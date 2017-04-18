@@ -211,7 +211,7 @@ public class EtlReport {
 					Long.valueOf(totalUnmapped));
 		}
 
-		sheet = workbook.createSheet("Problems");
+		sheet = workbook.getSheet("Problems");
 		addRow(sheet, "Table", "Description", "Nr of rows");
 		for (Problem problem : problems.values())
 			addRow(sheet, problem.table, problem.problemType, Long.valueOf(problem.count));
