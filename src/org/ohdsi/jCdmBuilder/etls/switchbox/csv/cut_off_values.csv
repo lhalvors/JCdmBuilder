@@ -1,0 +1,5 @@
+key,site1_cutoff,site2_cutoff
+amyloid_beta_1_42_cutoff,500,638.5
+total_tau_cutoff,350,296.5
+phosphorylated_tau_cutoff,85,56.5
+gds_30_cutoff,9,
