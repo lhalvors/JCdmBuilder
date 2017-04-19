@@ -1,0 +1,125 @@
+HS_CODE,MEANING,Concept_ID,Concept_Code,Concept_Name,Domain_ID
+ABLAZ_TARTARO,tartar removal,4042150,118292001,Removal,Procedure
+AEROSOL,aerosol,45765790,702808009,Aerosol therapy,Procedure
+AGHI_INSUL,insulin needles,4194531,79068005,Needle,Device
+ALBUMINA,albumin,4199139,52454007,Albumin,Observation
+ALBUMINA_U,albumin,4275213,365801005,Albumin level - finding,Measurement
+ALCOOL,alcohol habits,4086821,248140009,Oral habits,Observation
+ALP,Alkaline Phosphatase Level,4275206,365771003,Alkaline phosphatase level - finding,Measurement
+ALT,alanine aminotransferase,4211515,56935002,Alanine aminotransferase,Observation
+ALTEZZA,height,3036277,8302-2,Body height,Measurement
+AST,aspartate aminotransferase,4094657,26091008,Aspartate aminotransferase,Observation
+ATT_FIS,physical activity,4195380,68130003,Physical activity,Observation
+BMI,body mass index,4245997,60621009,Body mass index,Observation
+CALCIO,calcium,4207948,5540006,Calcium,Observation
+CALCIO_U,calcium,3012065,29276-3,Calcium [Presence] in Urine,Measurement
+CIRC_ADD,abdominal circumference,4245376,396552003,Abdominal circumference,Observation
+CLEARANCE,clearance creatinine,2212296,82575,Creatinine; clearance,Measurement
+COLE_TOT,total cholesterol,4224820,84698008,Cholesterol,Observation
+COLONSCO,colonoscopy,4249893,73761001,Colonoscopy,Procedure
+CREATIN,creatinine,2212285,82540,Creatine,Measurement
+CREATIN_U,creatinine,3003326,13484-1,Creatine/Creatinine [Mass Ratio] in Urine,Measurement
+CURE_INAL,inhalations,4030218,1366004,Inhalation therapy procedure,Procedure
+CURE_TERMALI,spa treatments,4128320,261570006,Thermotherapy,Procedure
+ECG,electrocardiogram,2007077,89.52,Electrocardiogram,Procedure
+ECG_SFORZO,stress ECG,4261794,46136006,Electrocardiogram with exercise test,Procedure
+ECO_CG,echocardiogram,4230911,40701008,Echocardiography,Procedure
+ECO_RENI,renal ultrasound,4147846,306005,Echography of kidney,Procedure
+ECOC_DOP,ecocolordoppler,4306147,8306009,Diagnostic Doppler ultrasonography,Procedure
+ECODOP_CARD,Doppler ultrasound cardiac,4171076,418976004,US scan of cardiac vessels,Procedure
+EGDS,esophagogastroduodenoscopy,4294382,76009000,Esophagogastroduodenoscopy,Procedure
+ELEMIOGR,electromyography,4088832,251515005,EMG finding,Measurement
+ELETTR_ANTALG,analgesic electrotherapy,4059953,169430000,Electrotherapy,Procedure
+ELETTROFORESI,electrophoresis,45771336,703450007,Electrophoresis,Observation
+ELETTROSTIMOL,electrostimulations,4059953,169430000,Electrotherapy,Procedure
+EMG_GLIC,glycated hemoglobin,4223625,40402000,Glucohemoglobin measurement,Measurement
+EMOCROMO,CBC,40758558,55429-5,CBC,Measurement
+ESC_SCORE,cardiovascolare risk - ESCSCORE,4235821,439827008,QRISK cardiovascular disease risk score,Observation
+FERRO,iron,2212421,83540,Iron,Measurement
+FISIOCHINESI_TERAP,fisiochinesi therapy,4145658,266739000,Physiotherapy/remedial therapy,Procedure
+FOSFORO,phosphorus,4024434,105816002,Phosphorus AND/OR phosphorus compound,Observation
+FOSFORO_U,phosphorus,3026729,2778-9,Phosphate [Mass/volume] in Urine,Measurement
+FT4,free thyroxine,4219024,39700003,Free thyroxine index,Measurement
+FUMO,smoking habits,45880274,LA8928-9,Smoking,Meas Value
+FUNDUS,fundus,4201612,53524009,Ophthalmoscopy,Procedure
+GFR,glomerular filtration rate,4213477,80274001,Glomerular filtration rate,Observation
+GGT,gamma glutamyl transferase,4289475,69480007,Gamma glutamyl transferase measurement,Measurement
+GLICEM,glucose,4282459,67079006,Glucose,Observation
+GLUC_CC,glucose load curve,4197462,313194008,Glucose load test,Procedure
+HCT,hematocrit,3009542,20570-8,Hematocrit,Measurement
+HDL,hdl cholesterol,4011133,102737005,HDL cholesterol,Observation
+HGB,hemoglobin,3000963,718-7,Hemoglobin,Measurement
+IMG_ENCEF,brain imaging,40481383,441986001,Imaging of brain,Procedure
+IMG_RAC_DOR_ANC,imaging dorsal spine and hip,4082988,241647000,MRI of thoracic spine,Procedure
+IMG_RAC_LOMB,imaging the lumbar spine,4086263,241580002,CT of lumbar spine,Procedure
+INFRARED,infrared,4060110,169421008,Infrared radiation therapy,Procedure
+INR,International Normalized Ratio,45757550,1.951E+12,International normalized ratio,Observation
+IONOFORESI,iontophoresis,2008283,99.27,Iontophoresis,Procedure
+LASER_ANTALG,laser pain therapy,4040252,229565001,Low power laser therapy,Procedure
+LDL,ldl cholesterol,2212451,83721,"Lipoprotein, direct measurement; LDL cholesterol",Measurement
+LEVIG_RADICI,sanding roots,4121940,234699004,Root planing of tooth,Procedure
+LINFOCITI,lymphocytes,46271191,709252005,Lymphocyte component of blood,Observation
+LNC_PUNGIDITO,lancets,4232069,350810002,Lancet,Device
+MAGNETOTERAP,magnetotherapy,4210260,313092005,Electromagnetic energy therapy,Procedure
+MAMMOG,mammography,44514091,U18.3,Mammography,Procedure
+MASSAGGI,massages,44515649,X61.3,Body massage,Procedure
+MCH,Mean Corpuscolar Hemoglobin,3035941,28539-5,MCH,Measurement
+MCV,mean corpuscular volume,3024731,30428-7,MCV,Measurement
+MEDIC_FERITA,wound dressing,4080499,182531007,Dressing of wound,Procedure
+MICROALB,micro albumin,3000034,14957-5,Microalbumin urine,Measurement
+MOB_COLON_VERT,mobilization spine,2007543,93.15,Mobilization of spine,Procedure
+MONOCITI,monocytes,4273306,365631001,Monocyte count - finding,Measurement
+NEUTROFILI,neutrophils,4306106,165518003,Neutrophilia,Measurement
+PANNOL_MUTAND,incontinence pads,45763524,470713005,Incontinence pants liner,Device
+PANNOL_SAGOM,shaped incontinence pads,45763524,470713005,Incontinence pants liner,Device
+PAP_TEST,pap test,2213243,88174,"Cytopathology, cervical or vaginal (any reporting system), collected in preservative fluid, automated thin layer preparation; screening by automated system, under physician supervision",Measurement
+PESO,weight,3025315,29463-7,Body weight,Measurement
+PLT,platelets,3049178,48386-7,Platelets Large/Platelets in Blood by Automated count,Measurement
+POLSI_PER,peripheral pulses,4183393,54718008,Peripheral pulse,Observation
+POTASSIO,potassium,4276440,365760004,Potassium level - finding,Measurement
+POTASSIO_U,potassium,3016038,2828-2,Potassium [Moles/volume] in Urine,Measurement
+PROTEINE,protein,4276572,365799007,Protein level - finding,Measurement
+PROTEINURIA,protein,3037185,2887-8,Protein [Presence] in Urine,Measurement
+PSA,Prostate Specific Antigen,4272032,63476009,Prostate specific antigen measurement,Measurement
+PTH,parathyroid hormone test,45957267,1.0832E+16,Parathyroid hormone,Observation
+RADAR_TERAP,radar therapy,4128320,261570006,Thermotherapy,Procedure
+RBC,Red Blood Cell,3012764,6742-1,RBC morphology,Measurement
+RIED_MOTORIA,motor rehabilitation,4180248,52052004,Rehabilitation therapy,Procedure
+RIM_CERUME,ear wax removal,4301559,385904005,Removal of ear wax,Procedure
+SACCHI_URINA,urine bags,4184824,41323003,Urinary collection bag,Device
+SIRING_INSUL,insulin syringes,45758126,462662009,"Insulin syringe, fixed-needle",Device
+SODIO,sodium,4269839,365761000,Sodium level - finding,Measurement
+SODIO_U,sodium,3003181,2955-3,Sodium [Moles/volume] in Urine,Measurement
+SOF,occult blood in the stool,45883777,LA16044-2,Test for blood in the stool,Meas Value
+SPIROM,spirometry,4133840,127783003,Spirometry,Measurement
+STR_GLICEM,strips for the blood glucose,4222987,337388004,Blood glucose testing strips,Device
+TRAV_MATERAS,cross saves mattress,4066264,17207004,Mattress,Device
+TRIGLIC,triglycerides,4267671,365795001,Triglyceride level - finding,Measurement
+TSH,thyroid-stimulating hormone,4246879,61167004,Thyroid stimulating hormone measurement,Measurement
+ULTRASON,ultrasonic therapy,4230801,89002000,Therapeutic ultrasound,Procedure
+UREA,blood urea nitrogen,4017361,105011006,Blood urea nitrogen measurement,Measurement
+UREA_U,urea,3034734,3092-4,Urea [Mass/volume] in Urine,Measurement
+URICEMIA,uricemia,2212615,84550,Uric acid; blood,Measurement
+URICURIA,uricuria,4012087,102865001,Uric acid crystalluria,Measurement
+URINE,urine complete test,3036941,24356-8,Urinalysis complete panel - Urine,Measurement
+V_CARDIOCHIRUGICA,heart surgery,4138651,306185001,Referral to cardiac surgery service,Procedure
+V_CARDIOLOGICA,cardiological,4204664,308471005,Referral to cardiologist,Procedure
+V_CHIRURGICA,surgical,4084690,183541002,Referral to surgeon,Procedure
+V_FISIATRICA,physiatrical,4084686,183524004,Referral to psychiatry service,Procedure
+V_GASTROENTEROLOGICA,gastroenterological,4084685,183523005,Referral to gastroenterology service,Procedure
+V_GINECOLOGICA,gynecological,4080083,183549000,Referral to gynecology service,Procedure
+V_NEFROLOGICA,nephrological,4142761,306286007,Referral to nephrologist,Procedure
+V_NEUROCHIRURGICA,neurosurgical,4084692,183546007,Referral to neurosurgical service,Procedure
+V_NEUROEVOLUTIVA,neurodevelopmental,4085018,183857005,Referral to developmental clinic,Procedure
+V_NEUROLOGICA,neurological,4084349,183521007,Referral to neurology service,Procedure
+V_NEUROPSICHIATRICA,neuropsychiatrical,4084686,183524004,Referral to psychiatry service,Procedure
+V_NEUROPSICOLOGICA,neuropsicological,4166401,416194003,Referral for neuropsychological testing,Procedure
+V_OCULISTICA,ophthalmological,4084691,183543004,Referral to ophthalmology service,Procedure
+V_ORTOPEDICA,orthopedical,4080082,183545006,Referral to orthopedic service,Procedure
+V_PNEUOMOLOGICA,pneumological,4079634,183544005,"Referral to ear, nose and throat service",Procedure
+V_REUMATOLOGICA,rheumatological,4141720,306290009,Referral to rheumatologist,Procedure
+V_UROLOGICA,urological,4138655,306201000,Referral to urology service,Procedure
+VEMS,FEV1 Forced expiratory volume in the 1st second,4241837,59328004,Forced expired volume in 1 second,Observation
+VES,erythrocyte sedimentation rate,3015183,30341-2,Erythrocyte sedimentation rate,Measurement
+VIT_B12,vitamine B12,4276285,365604004,Vitamin B12 level - finding,Measurement
+WBC,White Blood Cell,3008757,11156-7,WBC morphology,Measurement

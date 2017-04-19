@@ -65,6 +65,7 @@ import org.ohdsi.jCdmBuilder.etls.ars.v5.ARSETLv5;
 import org.ohdsi.jCdmBuilder.etls.cdm.CdmEtl;
 import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETL;
 import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETLToV5;
+import org.ohdsi.jCdmBuilder.etls.genomedics.GenomedicsETLtoV5;
 import org.ohdsi.jCdmBuilder.vocabulary.CopyVocabularyFromSchema;
 import org.ohdsi.jCdmBuilder.vocabulary.InsertVocabularyInServer;
 import org.ohdsi.utilities.PropertiesManager;
@@ -488,7 +489,7 @@ public class JCdmBuilderMain {
 		etlTypePanel.setLayout(new BoxLayout(etlTypePanel, BoxLayout.X_AXIS));
 		etlTypePanel.setBorder(BorderFactory.createTitledBorder("ETL type"));
 		etlType = new JComboBox<String>(
-				new String[] { "1. Load CSV files in CDM format to server", "2. ARS -> OMOP CDM V4", "3. HCUP -> OMOP CDM V4", "4. HCUP -> OMOP CDM V5", "5. ARS -> OMOP CDM V5" });
+				new String[] { "1. Load CSV files in CDM format to server", "2. ARS -> OMOP CDM V4", "3. HCUP -> OMOP CDM V4", "4. HCUP -> OMOP CDM V5", "5. ARS -> OMOP CDM V5", "6. Genomedics -> OMOP CDM V5" });
 		etlType.setToolTipText("Select the appropriate ETL process");
 		etlType.addItemListener(new ItemListener() {
 			
@@ -1023,6 +1024,16 @@ public class JCdmBuilderMain {
 				}
 				if (etlType.getSelectedItem().equals("4. HCUP -> OMOP CDM V5")) {
 					HCUPETLToV5 etl = new HCUPETLToV5();
+					DbSettings sourceDbSettings = getSourceDbSettings();
+					DbSettings targetDbSettings = getTargetDbSettings();
+					if (sourceDbSettings != null && targetDbSettings != null) {
+						testConnection(sourceDbSettings, true);
+						testConnection(targetDbSettings, false);
+						etl.process(folderField.getText(), sourceDbSettings, targetDbSettings, maxPersons, Integer.parseInt(versionIdField.getText()));
+					}
+				}
+				if (etlType.getSelectedItem().equals("6. Genomedics -> OMOP CDM V5")) {
+					GenomedicsETLtoV5 etl = new GenomedicsETLtoV5();
 					DbSettings sourceDbSettings = getSourceDbSettings();
 					DbSettings targetDbSettings = getTargetDbSettings();
 					if (sourceDbSettings != null && targetDbSettings != null) {

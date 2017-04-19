@@ -1,0 +1,34 @@
+unita_mis_ddd,MEANING,Concept_ID,Concept_code,Concept_name
+Appl,Applications,45891000,[App],application
+Bust.,Sachets,45756960,3318911000001100,sachet
+Cer.,Plasters,45756969,3320711000001102,plaster
+Clismi,Enema,45912654,162357,Enema(s)
+cm2,Gauzes,45756986,8091811000001107,bandage
+Cp.,Tablets,9431,{tbl},tablet
+Disp.,Devices,45756958,3318711000001107,device
+Dosi,Doses,8513,{dose},dose
+f,Vials,45937948,162763,Vial(s)
+F.,Vials,45937948,162763,Vial(s)
+F:,Vials,45937948,162763,Vial(s)
+Fazz.,Tissues,0,No matching concept,
+Fl.,Vials,45937948,162763,Vial(s)
+g,Grams,8504,g,gram
+g prod.,Grams,8504,g,gram
+Garze,Gauzes,45756986,8091811000001107,bandage
+Ins.,Inserts,45756931,10693411000001103,insert
+Inserti,Inserts,45756931,10693411000001103,insert
+Inserto,Inserts,45756931,10693411000001103,insert
+kU,1000 Units,8566,10*3,thousand
+Lam.,Lamella,45757515,1701000175103,Wafer - unit of product usage
+MBq,Vials,45937948,162763,Vial(s)
+mcg,Micrograms,9655,ug,microgram
+Membr.,Membrane,45756932,10693511000001104,film
+mg,Milligrams,8576,mg,milligram
+ml,Milliliters,8587,mL,milliliter
+MU,1000000 Units,9689,10*6.[U],Million unit
+Ov.,Ovules,45756956,3318511000001102,pessary
+Puff,Puff,45919316,162372,Puff(s)
+Sup.,Suppositories,45952078,1518,Suppository(ies)
+Supp.,Suppositories,45952078,1518,Suppository(ies)
+Tb.,Tubes,45912657,162380,Tube(s)
+U,Units,8510,[U],unit
