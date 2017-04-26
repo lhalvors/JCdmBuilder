@@ -1,0 +1,24 @@
+via,MEANING,Concept_ID,Concept_code,Concept_name
+0s,Oral,4128794,260548002,Oral
+art,Injectable,4112421,255560000,Intravenous
+cut,External use,4073260,17751009,External use
+cwg,Oral,4128794,260548002,Oral
+impianto,External use,4073260,17751009,External use
+inal,Inhaled,45956874,18679011000001101,Inhalation
+inal-os,Inhaled,45956874,18679011000001101,Inhalation
+loc,External use,4073260,17751009,External use
+nas,Inhaled,45956874,18679011000001101,Inhalation
+oft,Ophthalmic,4184451,54485002,Ocular
+os,Oral,4128794,260548002,Oral
+oto,External use,4073260,17751009,External use
+p,Injectable,4112421,255560000,Intravenous
+"p,inal",Inhaled,45956874,18679011000001101,Inhalation
+"p,os",Injectable,4112421,255560000,Intravenous
+ret,Rectal,4115462,255582007,Rectal
+rin,Inhaled,45956874,18679011000001101,Inhalation
+sl,Oral,4128794,260548002,Oral
+td,Transdermal,4262099,45890007,Transdermal
+trach,Inhaled,45956874,18679011000001101,Inhalation
+vag,External use,4073260,17751009,External use
+vesc,External use,4073260,17751009,External use
+vitr,Injectable,4112421,255560000,Intravenous
