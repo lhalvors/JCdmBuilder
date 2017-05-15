@@ -169,7 +169,7 @@ public class ARSETL {
 		icd9ToConcept = new CodeToConceptMap("ICD-9 to concept_id mapping");
 		// query =
 		// "SELECT source_code,source_code_description,target_concept_id,concept_code,concept_name FROM source_to_concept_map INNER JOIN concept ON target_concept_id = concept_id WHERE source_vocabulary_id = 2 AND (target_vocabulary_id = 1 OR target_vocabulary_id = 15)";
-		for (Row row : connection.queryResource("icd9ToConcept.sql")) {
+		for (Row row : connection.queryResource("sql/icd9ToConcept.sql")) {
 			row.upperCaseFieldNames();
 			icd9ToConcept.add(row.get("SOURCE_CODE"), row.get("SOURCE_CODE_DESCRIPTION"), row.getInt("TARGET_CONCEPT_ID"), row.get("CONCEPT_CODE"),
 					row.get("CONCEPT_NAME"));
@@ -189,14 +189,14 @@ public class ARSETL {
 		
 		System.out.println("- Loading ATC to RxNorm concept_id mapping");
 		atcToRxNormConcepts = new CodeToConceptMap("ATC to RxNorm ingredient mapping");
-		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("AtcToRxNormIngredient.csv"))) {
+		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/AtcToRxNormIngredient.csv"))) {
 			row.upperCaseFieldNames();
 			atcToRxNormConcepts.add(row.get("ATC"), row.get("ATC_NAME"), row.getInt("RXNORM_CONCEPT_ID"), row.get("RXNORM_CODE"),
 					row.get("RXNORM_CONCEPT NAME"));
 		}
 		System.out.println("- Loading specialty to concept mapping");
 		specialtyToConcept = new CodeToConceptMap("Specialty to concept mapping");
-		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("specialty_italian.csv"))) {
+		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/specialty_italian.csv"))) {
 			row.upperCaseFieldNames();
 			specialtyToConcept.add(removeLeadingZeroes(row.get("COD")), row.get("DESCRIZIONE"), row.getInt("CONCEPT_ID"), row.get("CONCEPT_CODE"),
 					row.get("CONCEPT_NAME"));
@@ -204,7 +204,7 @@ public class ARSETL {
 		
 		System.out.println("- Loading proc_cod to type_outpat mapping");
 		procToType = new HashMap<String, String>();
-		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("proc_OUTPAT.csv"))) {
+		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/proc_OUTPAT.csv"))) {
 			row.upperCaseFieldNames();
 			procToType.put(row.get("PROC_COD"), row.get("TYPE_OUTPAT"));
 		}

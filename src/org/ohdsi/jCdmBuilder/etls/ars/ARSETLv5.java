@@ -13,7 +13,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  ******************************************************************************/
-package org.ohdsi.jCdmBuilder.etls.ars.v5;
+package org.ohdsi.jCdmBuilder.etls.ars;
 
 import java.io.File;
 import java.text.SimpleDateFormat;
@@ -260,7 +260,7 @@ public class ARSETLv5 {
 
 		System.out.println("- Loading specialty to concept mapping");
 		specialtyToConcept = new CodeToConceptMap("Specialty to concept mapping");
-		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("../specialty_italian.csv"))) {
+		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/specialty_italian.csv"))) {
 			row.upperCaseFieldNames();
 			specialtyToConcept.add(removeLeadingZeroes(row.get("COD")), row.get("DESCRIZIONE"), row.getInt("CONCEPT_ID"), row.get("CONCEPT_CODE"),
 					row.get("CONCEPT_NAME"));
@@ -268,7 +268,7 @@ public class ARSETLv5 {
 
 		System.out.println("- Loading proc_cod to type_outpat mapping");
 		procToType = new HashMap<String, String>();
-		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("../proc_OUTPAT.csv"))) {
+		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/proc_OUTPAT.csv"))) {
 			row.upperCaseFieldNames();
 			procToType.put(row.get("PROC_COD"), row.get("TYPE_OUTPAT"));
 		}

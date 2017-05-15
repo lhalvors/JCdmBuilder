@@ -61,7 +61,7 @@ import org.ohdsi.databases.RichConnection;
 import org.ohdsi.jCdmBuilder.cdm.Cdm;
 import org.ohdsi.jCdmBuilder.cdm.EraBuilder;
 import org.ohdsi.jCdmBuilder.etls.ars.ARSETL;
-import org.ohdsi.jCdmBuilder.etls.ars.v5.ARSETLv5;
+import org.ohdsi.jCdmBuilder.etls.ars.ARSETLv5;
 import org.ohdsi.jCdmBuilder.etls.cdm.CdmEtl;
 import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETL;
 import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETLToV5;
