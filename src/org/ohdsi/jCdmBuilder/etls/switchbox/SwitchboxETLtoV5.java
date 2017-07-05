@@ -146,6 +146,8 @@ public class SwitchboxETLtoV5 {
 		if ((newCdmStructure) || (!tableNames.contains("sb_fact")))
 			createCustomTablesAndConcepts(dbSettings);
 
+		if (!tableNames.contains("cost"))
+			createCostTable(dbSettings);
 		if (!tableNames.contains("_version"))
 			connection.execute("CREATE TABLE _version(version_id INT,version_date DATE);");	
 		
@@ -430,7 +432,7 @@ public class SwitchboxETLtoV5 {
 				visitFactType = 2000000260;
 				break;
 			case "2":
-				visit = "_MONTH6";
+				visit = "_MONTH06";
 				visitFactType = 2000000261;
 				break;
 			case "3":
@@ -750,7 +752,7 @@ public class SwitchboxETLtoV5 {
 							}
 							if (tmtA_Z_score != null) {
 								addToFact(personId,(long) 2000000211, visitDate, visitFactType, null, tmtA_Z_score, null, null, null,  // Trail Making Test - section A z-score.: 2000000211
-										UNIT_NA, null, visitOccurrenceId,"",getField("TMTA"), null, null, tmtA.toString()); 
+										UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
 								
 							}
 						}
@@ -782,7 +784,7 @@ public class SwitchboxETLtoV5 {
 							}
 							if (tmtB_Z_score != null) {
 								addToFact(personId,(long) 2000000213, visitDate, visitFactType, null, tmtB_Z_score, null, null, null,  // Trail Making Test - section B z-score.: 2000000213
-										UNIT_NA, null, visitOccurrenceId,"",getField("TMTB"), null, null, tmtB.toString()); 
+										UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
 							}
 						}
 					}
@@ -801,7 +803,7 @@ public class SwitchboxETLtoV5 {
 					if ((stroop1 != null) && (age != null) && (eduLow != null) && (eduHigh != null)) {
 						stroop1_Z_score = ((1.0/stroop1)-(0.01566 + (0.000315*age) - (0.00112*eduLow) + (0.001465*eduHigh) - (0.0000032*(age*age)) ) ) / 0.0034;
 						addToFact(personId,(long) 2000000277, visitDate, visitFactType, null, stroop1_Z_score, null, null, null,  // Stroop Part 1 - Z score: 2000000277
-								UNIT_NA, null, visitOccurrenceId,"",getField("STROOP1"), null, null, stroop1.toString()); 
+								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
 					}
 					if ((stroop2 != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						Double tmpStr2_predict = (52.468 + (0.209 * age) + (0.007 * age * age) + (2.390 * tmpGender) + (4.235 * eduLow) + (-2.346 * eduHigh));
@@ -817,13 +819,13 @@ public class SwitchboxETLtoV5 {
 						if (tmpStr2_sd != null) {
 							stroop2_Z_score = - ((stroop2 - tmpStr2_predict) / tmpStr2_sd);
 							addToFact(personId,(long) 2000000279, visitDate, visitFactType, null, stroop2_Z_score, null, null, null,  // Stroop Part 2 - Z score: 2000000279
-									UNIT_NA, null, visitOccurrenceId,"",getField("STROOP2"), null, null, stroop2.toString()); 
+									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);
 						}
 					}
 					if ((stroop3 != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						stroop3_Z_score = ((1.0/stroop3) - (0.001926 + (0.000348*age) + (0.0002244*tmpGender) - (0.0006982*eduLow) + (0.001015*eduHigh) - (0.000003522*(age*age)) )) / 0.002;
 						addToFact(personId,(long) 2000000281, visitDate, visitFactType, null, stroop3_Z_score, null, null, null,  // Stroop Part 3 - Z score: 2000000281
-								UNIT_NA, null, visitOccurrenceId,"",getField("STROOP3"), null, null, stroop3.toString()); 
+								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
 					}
 					
 					// ===== AVLT Z scores =====
@@ -832,12 +834,12 @@ public class SwitchboxETLtoV5 {
 					if ((avltDelayed != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						avltDelayed_Z_score = ( avltDelayed - (10.924 + (-0.073 * (age - 50.0)) + (-0.0009 * ((age - 50.0)*(age - 50.0))) + (-1.197 * tmpGender) + (-0.844 * eduLow) + (0.424 * eduHigh))) / 2.496;
 						addToFact(personId,(long) 2000000016, visitDate, visitFactType, null, avltDelayed_Z_score, null, null, null,  // AVLT delayed z-score: 2000000016
-								UNIT_NA, null, visitOccurrenceId,"",getField("AVLT_DELAYED"), null, null, avltDelayed.toString()); 
+								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
 					}
 					if ((avltImmediate != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						avltImmediate_Z_score = ( avltImmediate - (49.672 + (-0.247 * (age - 50.0)) + (-0.0033 * ((age - 50.0)*(age - 50.0))) + (-4.227 * tmpGender) + (-3.055 * eduLow) + (2.496 * eduHigh)))/7.826;
 						addToFact(personId,(long) 2000000018, visitDate, visitFactType, null, avltImmediate_Z_score, null, null, null,  // AVLT immediate z-score: 2000000018
-								UNIT_NA, null, visitOccurrenceId,"",getField("AVLT_IMMEDIATE"), null, null, avltImmediate.toString()); 
+								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
 					}
 					
 					// ===== Story Z scores =====	
@@ -857,7 +859,7 @@ public class SwitchboxETLtoV5 {
 							storyImmediate_Z_score = (storyImmediate - 14.1) / 3.07;
 						if (storyImmediate_Z_score != null) {
 							addToFact(personId,(long) 2000000209, visitDate, visitFactType, null, storyImmediate_Z_score, null, null, null,  // Story immediate z-score: 2000000209
-									UNIT_NA, null, visitOccurrenceId,"",getField("STORY_IMMEDIATE"), null, null, storyImmediate.toString()); 
+									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
 						}						
 					}
 					// Story delayed Z score
@@ -876,7 +878,7 @@ public class SwitchboxETLtoV5 {
 							storyDelayed_Z_score = (storyDelayed - 14.0) / 3.13;
 						if (storyDelayed_Z_score != null) {
 							addToFact(personId,(long) 2000000207, visitDate, visitFactType, null, storyDelayed_Z_score, null, null, null,  // Story delayed z-score: 2000000207
-									UNIT_NA, null, visitOccurrenceId,"",getField("STORY_DELAYED"), null, null, storyDelayed.toString()); 
+									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
 						}						
 					}
 					
@@ -1214,7 +1216,8 @@ public class SwitchboxETLtoV5 {
 
 	//********************  ********************//
 	private Long addToPerson(Row row) {
-		personRefToId.put(getRowValue(row,"PERSON_ID"), maxPersonId);
+		Long newPersonId = maxPersonId++;
+		personRefToId.put(getRowValue(row,"PERSON_ID"), newPersonId);
 		String tmpG = getRowValue(row,"GENDER").toLowerCase();
 		Long genderConceptId = null;
 		if ((tmpG != null) && (tmpG.length() > 0))
@@ -1232,7 +1235,7 @@ public class SwitchboxETLtoV5 {
 		Integer age = getPersonAge(row);
 		
 		Row person = new Row();
-		person.add("person_id", maxPersonId++);
+		person.add("person_id", newPersonId);
 		person.add("gender_concept_id", genderConceptId);
 
 		person.add("year_of_birth", getRowValue(row,"BIRTH_DATE_YEAR"));
@@ -1255,12 +1258,12 @@ public class SwitchboxETLtoV5 {
 		person.add("ethnicity_source_concept_id", "");
 
 		if (genderConceptId != null)
-			personIdToGenderConceptId.put(maxPersonId, genderConceptId);
+			personIdToGenderConceptId.put(newPersonId, genderConceptId);
 		if (age != null)
-			personIdToAge.put(maxPersonId, age);
+			personIdToAge.put(newPersonId, age);
 
 		tableToRows.put("person", person);
-		return maxPersonId;
+		return newPersonId;
 	}
 
 	//********************  ********************//
@@ -1611,6 +1614,19 @@ public class SwitchboxETLtoV5 {
 			sqlFile = "sql/CreateFactTablesConcepts - SQL Server.sql";
 		} else if (dbSettings.dbType == DbType.POSTGRESQL) {
 			sqlFile = "sql/CreateFactTablesConcepts - PostgreSQL.sql";
+		}
+		connection.executeResource(sqlFile);
+	}
+
+	//********************  ********************//
+	private void createCostTable(DbSettings dbSettings) {
+		String sqlFile = "sql/CreateCostTable - SQL Server.sql";
+		if (dbSettings.dbType == DbType.ORACLE) {
+			sqlFile = "sql/CreateCostTable - SQL Server.sql";
+		} else if (dbSettings.dbType == DbType.MSSQL) {
+			sqlFile = "sql/CreateCostTable - SQL Server.sql";
+		} else if (dbSettings.dbType == DbType.POSTGRESQL) {
+			sqlFile = "sql/CreateCostTable - PostgreSQL.sql";
 		}
 		connection.executeResource(sqlFile);
 	}
