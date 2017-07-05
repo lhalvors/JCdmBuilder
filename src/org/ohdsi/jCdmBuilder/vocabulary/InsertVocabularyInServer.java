@@ -21,6 +21,7 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.ohdsi.databases.DbType;
 import org.ohdsi.databases.RichConnection;
 import org.ohdsi.jCdmBuilder.DbSettings;
 import org.ohdsi.jCdmBuilder.utilities.ReadAthenaFile;
@@ -45,7 +46,11 @@ public class InsertVocabularyInServer {
 				String table = file.getName().substring(0, file.getName().length() - 4);
 				if (tables.contains(table.toLowerCase())) {
 					StringUtilities.outputWithTime("Inserting data for table " + table);
-					connection.execute("TRUNCATE " + table);
+					if ((dbSettings.dbType == DbType.MSSQL) || (dbSettings.dbType == DbType.ORACLE)) {
+						connection.execute("TRUNCATE TABLE " + table);
+					} else {
+						connection.execute("TRUNCATE " + table);
+					}
 					Iterator<Row> iterator = new ReadAthenaFile(file.getAbsolutePath()).iterator();
 					Iterator<Row> filteredIterator = new RowFilterIterator(iterator, connection.getFieldNames(table), table);
 					connection.insertIntoTable(filteredIterator, table, false, true);
