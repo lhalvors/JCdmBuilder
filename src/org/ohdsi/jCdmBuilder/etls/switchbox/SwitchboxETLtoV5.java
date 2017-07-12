@@ -1206,7 +1206,7 @@ public class SwitchboxETLtoV5 {
 	//********************  ********************//
 	private void addToObservationPeriod(long personId, String startDate, String endDate) {
 		Row observationPeriod = new Row();
-		observationPeriod.add("observation_period_id", observationPeriodId);
+		observationPeriod.add("observation_period_id", observationPeriodId++);
 		observationPeriod.add("person_id", personId);
 		observationPeriod.add("observation_period_start_date", startDate);
 		observationPeriod.add("observation_period_end_date", endDate != null ? endDate : "");
