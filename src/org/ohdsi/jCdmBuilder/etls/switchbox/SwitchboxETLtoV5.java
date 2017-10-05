@@ -19,11 +19,11 @@ import java.io.File;
 import java.text.DateFormat;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.Period;
-import java.util.ArrayList;
+//import java.time.LocalDate;
+//import java.time.Period;
 //import java.util.ArrayList;
-import java.util.Arrays;
+//import java.util.ArrayList;
+//import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
@@ -41,12 +41,12 @@ import org.ohdsi.jCdmBuilder.etls.switchbox.PersonVisitMap;
 import org.ohdsi.jCdmBuilder.etls.switchbox.PersonVisitMap.PersonDomainData;
 import org.ohdsi.jCdmBuilder.etls.switchbox.PersonVisitMap.TargetVisit;
 //import org.ohdsi.jCdmBuilder.utilities.CSVFileChecker;
-import org.ohdsi.jCdmBuilder.utilities.CodeToConceptMap;
+//import org.ohdsi.jCdmBuilder.utilities.CodeToConceptMap;
 //import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap;
 //import org.ohdsi.jCdmBuilder.utilities.ETLUtils;
 import org.ohdsi.jCdmBuilder.utilities.QCSampleConstructor;
-import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.CodeDomainData;
-import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.TargetConcept;
+//import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.CodeDomainData;
+//import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.TargetConcept;
 //import org.ohdsi.sql.StringUtils;
 //import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.CodeDomainData;
 //import org.ohdsi.jCdmBuilder.utilities.CodeToDomainConceptMap.TargetConcept;
@@ -105,11 +105,11 @@ public class SwitchboxETLtoV5 {
 	private long						personId;
 	private long						maxPersonId;
 	private long						observationPeriodId;
-	private long						drugExposureId;
+//	private long						drugExposureId;
 	private long						visitOccurrenceId;
 	private long						careSiteId;
-	private long						observationId;
-	private long						measurementId;
+//	private long						observationId;
+//	private long						measurementId;
 	private long						factId;
 	private long						factAttributeId;
 
@@ -160,10 +160,10 @@ public class SwitchboxETLtoV5 {
 		personId = 0;
 		maxPersonId = 0;
 		observationPeriodId = 0;
-		drugExposureId = 0;
+//		drugExposureId = 0;
 		visitOccurrenceId = 0;
-		observationId = 0;
-		measurementId = 0;
+//		observationId = 0;
+//		measurementId = 0;
 		factId = 0;
 		factAttributeId = 0;
 		careSiteId = 0;
@@ -432,7 +432,7 @@ public class SwitchboxETLtoV5 {
 				visitFactType = 2000000260;
 				break;
 			case "2":
-				visit = "_MONTH06";
+				visit = "_MONTH6";
 				visitFactType = 2000000261;
 				break;
 			case "3":
@@ -752,7 +752,7 @@ public class SwitchboxETLtoV5 {
 							}
 							if (tmtA_Z_score != null) {
 								addToFact(personId,(long) 2000000211, visitDate, visitFactType, null, tmtA_Z_score, null, null, null,  // Trail Making Test - section A z-score.: 2000000211
-										UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
+										UNIT_NA, null, visitOccurrenceId,"",getField("TMTA"), null, null, tmtA.toString()); 
 								
 							}
 						}
@@ -784,7 +784,7 @@ public class SwitchboxETLtoV5 {
 							}
 							if (tmtB_Z_score != null) {
 								addToFact(personId,(long) 2000000213, visitDate, visitFactType, null, tmtB_Z_score, null, null, null,  // Trail Making Test - section B z-score.: 2000000213
-										UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
+										UNIT_NA, null, visitOccurrenceId,"",getField("TMTB"), null, null, tmtB.toString()); 
 							}
 						}
 					}
@@ -803,7 +803,7 @@ public class SwitchboxETLtoV5 {
 					if ((stroop1 != null) && (age != null) && (eduLow != null) && (eduHigh != null)) {
 						stroop1_Z_score = ((1.0/stroop1)-(0.01566 + (0.000315*age) - (0.00112*eduLow) + (0.001465*eduHigh) - (0.0000032*(age*age)) ) ) / 0.0034;
 						addToFact(personId,(long) 2000000277, visitDate, visitFactType, null, stroop1_Z_score, null, null, null,  // Stroop Part 1 - Z score: 2000000277
-								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
+								UNIT_NA, null, visitOccurrenceId,"",getField("STROOP1"), null, null, stroop1.toString()); 
 					}
 					if ((stroop2 != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						Double tmpStr2_predict = (52.468 + (0.209 * age) + (0.007 * age * age) + (2.390 * tmpGender) + (4.235 * eduLow) + (-2.346 * eduHigh));
@@ -819,13 +819,13 @@ public class SwitchboxETLtoV5 {
 						if (tmpStr2_sd != null) {
 							stroop2_Z_score = - ((stroop2 - tmpStr2_predict) / tmpStr2_sd);
 							addToFact(personId,(long) 2000000279, visitDate, visitFactType, null, stroop2_Z_score, null, null, null,  // Stroop Part 2 - Z score: 2000000279
-									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);
+									UNIT_NA, null, visitOccurrenceId,"",getField("STROOP2"), null, null, stroop2.toString()); 
 						}
 					}
 					if ((stroop3 != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						stroop3_Z_score = ((1.0/stroop3) - (0.001926 + (0.000348*age) + (0.0002244*tmpGender) - (0.0006982*eduLow) + (0.001015*eduHigh) - (0.000003522*(age*age)) )) / 0.002;
 						addToFact(personId,(long) 2000000281, visitDate, visitFactType, null, stroop3_Z_score, null, null, null,  // Stroop Part 3 - Z score: 2000000281
-								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
+								UNIT_NA, null, visitOccurrenceId,"",getField("STROOP3"), null, null, stroop3.toString()); 
 					}
 					
 					// ===== AVLT Z scores =====
@@ -834,12 +834,12 @@ public class SwitchboxETLtoV5 {
 					if ((avltDelayed != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						avltDelayed_Z_score = ( avltDelayed - (10.924 + (-0.073 * (age - 50.0)) + (-0.0009 * ((age - 50.0)*(age - 50.0))) + (-1.197 * tmpGender) + (-0.844 * eduLow) + (0.424 * eduHigh))) / 2.496;
 						addToFact(personId,(long) 2000000016, visitDate, visitFactType, null, avltDelayed_Z_score, null, null, null,  // AVLT delayed z-score: 2000000016
-								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
+								UNIT_NA, null, visitOccurrenceId,"",getField("AVLT_DELAYED"), null, null, avltDelayed.toString()); 
 					}
 					if ((avltImmediate != null) && (age != null) && (tmpGender != null) && (eduLow != null) && (eduHigh != null)) {
 						avltImmediate_Z_score = ( avltImmediate - (49.672 + (-0.247 * (age - 50.0)) + (-0.0033 * ((age - 50.0)*(age - 50.0))) + (-4.227 * tmpGender) + (-3.055 * eduLow) + (2.496 * eduHigh)))/7.826;
 						addToFact(personId,(long) 2000000018, visitDate, visitFactType, null, avltImmediate_Z_score, null, null, null,  // AVLT immediate z-score: 2000000018
-								UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
+								UNIT_NA, null, visitOccurrenceId,"",getField("AVLT_IMMEDIATE"), null, null, avltImmediate.toString()); 
 					}
 					
 					// ===== Story Z scores =====	
@@ -859,7 +859,7 @@ public class SwitchboxETLtoV5 {
 							storyImmediate_Z_score = (storyImmediate - 14.1) / 3.07;
 						if (storyImmediate_Z_score != null) {
 							addToFact(personId,(long) 2000000209, visitDate, visitFactType, null, storyImmediate_Z_score, null, null, null,  // Story immediate z-score: 2000000209
-									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null); 
+									UNIT_NA, null, visitOccurrenceId,"",getField("STORY_IMMEDIATE"), null, null, storyImmediate.toString()); 
 						}						
 					}
 					// Story delayed Z score
@@ -878,7 +878,7 @@ public class SwitchboxETLtoV5 {
 							storyDelayed_Z_score = (storyDelayed - 14.0) / 3.13;
 						if (storyDelayed_Z_score != null) {
 							addToFact(personId,(long) 2000000207, visitDate, visitFactType, null, storyDelayed_Z_score, null, null, null,  // Story delayed z-score: 2000000207
-									UNIT_NA, null, visitOccurrenceId,"",null, null, null, null);  
+									UNIT_NA, null, visitOccurrenceId,"",getField("STORY_DELAYED"), null, null, storyDelayed.toString()); 
 						}						
 					}
 					
@@ -1134,26 +1134,26 @@ public class SwitchboxETLtoV5 {
 					tmpS = getRowValue(row, "HEIGHT");
 					if ((tmpS != null) && (StringUtilities.isNumber(tmpS))) {
 						tmpDbl = Double.valueOf(tmpS);
-						addToMeasurement(personId, (long) 3036277, visitDate, 44818701, // 3036277: height, 44818701: from physical examination
-								tmpDbl, null, UNIT_CM, null, getField("HEIGHT"), null, tmpS);
+						addToFact(personId,(long) 2000000388, visitDate, visitFactType, null, tmpDbl, null, null, null,  // Length: 2000000388
+								UNIT_CM, null, visitOccurrenceId,"",getField("HEIGHT"), null, null, tmpS); 
 					}
 					tmpS = getRowValue(row, "WEIGHT");
 					if ((tmpS != null) && (StringUtilities.isNumber(tmpS))) {
 						tmpDbl = Double.valueOf(tmpS);
-						addToMeasurement(personId, (long) 3025315, visitDate, 44818701, // 3025315: weight, 44818701: from physical examination
-								tmpDbl, null, UNIT_KG, null, getField("WEIGHT"), null, tmpS);
+						addToFact(personId,(long) 2000000462, visitDate, visitFactType, null, tmpDbl, null, null, null,  // Weight: 2000000462
+								UNIT_KG, null, visitOccurrenceId,"",getField("WEIGHT"), null, null, tmpS); 
 					}
 					tmpS = getRowValue(row, "BP_SYSTOLIC");
 					if ((tmpS != null) && (StringUtilities.isNumber(tmpS))) {
 						tmpDbl = Double.valueOf(tmpS);
-						addToMeasurement(personId, (long) 3004249, visitDate, 44818701, // 3004249: BP systolic, 44818701: from physical examination
-								tmpDbl, null, UNIT_MMHG, null, getField("BP_SYSTOLIC"), null, tmpS);
+						addToFact(personId,(long) 2000000440, visitDate, visitFactType, null, tmpDbl, null, null, null,  // Systolic Blood Pressure: 2000000440
+								UNIT_MMHG, null, visitOccurrenceId,"",getField("BP_SYSTOLIC"), null, null, tmpS); 
 					}
 					tmpS = getRowValue(row, "BP_DIASTOLIC");
 					if ((tmpS != null) && (StringUtilities.isNumber(tmpS))) {
 						tmpDbl = Double.valueOf(tmpS);
-						addToMeasurement(personId, (long) 3012888, visitDate, 44818701, // 3012888: BP diastolic, 44818701: from physical examination
-								tmpDbl, null, UNIT_MMHG, null, getField("BP_DIASTOLIC"), null, tmpS);
+						addToFact(personId,(long) 2000000364, visitDate, visitFactType, null, tmpDbl, null, null, null,  // Diastolic Blood Pressure: 2000000364
+								UNIT_MMHG, null, visitOccurrenceId,"",getField("BP_DIASTOLIC"), null, null, tmpS); 
 					}
 				}
 			}
@@ -1206,7 +1206,7 @@ public class SwitchboxETLtoV5 {
 	//********************  ********************//
 	private void addToObservationPeriod(long personId, String startDate, String endDate) {
 		Row observationPeriod = new Row();
-		observationPeriod.add("observation_period_id", observationPeriodId++);
+		observationPeriod.add("observation_period_id", observationPeriodId);
 		observationPeriod.add("person_id", personId);
 		observationPeriod.add("observation_period_start_date", startDate);
 		observationPeriod.add("observation_period_end_date", endDate != null ? endDate : "");
@@ -1293,62 +1293,62 @@ public class SwitchboxETLtoV5 {
 	}
 
 	//********************  ********************//
-	private void addToMeasurement(
-			long mPersonId,
-			long measurementConceptId,
-			String measurementDate,
-			String measurementTime,
-			long measurementTypeConceptId,
-			Long operatorConceptId,
-			Double valueAsNumber,
-			Long valueAsConceptId,
-			Long unitConceptId,
-			Double rangeLow,
-			Double rangeHigh,
-			Long mProviderId,
-			Long visitOccurrenceId,
-			String measurementSourceValue,
-			Long measurementSourceConceptId,
-			String unitSourceValue,
-			String valueSourceValue) {
-		Row measurement = new Row();
-		measurement.add("measurement_id", ++measurementId);
-		measurement.add("person_id", mPersonId);
-		measurement.add("measurement_concept_id", measurementConceptId);
-		measurement.add("measurement_date", (measurementDate != null ? measurementDate : ""));
-		measurement.add("measurement_time", (measurementTime != null ? measurementTime : ""));
-		measurement.add("measurement_type_concept_id", measurementTypeConceptId);
-		measurement.add("operator_concept_id", (operatorConceptId != null ? operatorConceptId.toString() : ""));
-		measurement.add("value_as_number", (valueAsNumber != null ? valueAsNumber.toString() : ""));
-		measurement.add("value_as_concept_id", (valueAsConceptId != null ? valueAsConceptId.toString() : ""));
-		measurement.add("unit_concept_id", (unitConceptId != null ? unitConceptId.toString() : ""));
-		measurement.add("range_low", (rangeLow != null ? rangeLow.toString() : ""));
-		measurement.add("range_high", (rangeHigh != null ? rangeHigh.toString() : ""));
-		measurement.add("provider_id", (mProviderId != null ? mProviderId.toString() : ""));
-		measurement.add("visit_occurrence_id", (visitOccurrenceId != null ? visitOccurrenceId.toString() : ""));
-		measurement.add("measurement_source_value", measurementSourceValue != null ? measurementSourceValue : "");
-		measurement.add("measurement_source_concept_id", (measurementSourceConceptId != null ? measurementSourceConceptId.toString() : ""));
-		measurement.add("unit_source_value", unitSourceValue != null ? unitSourceValue : "");
-		measurement.add("value_source_value", valueSourceValue != null ? valueSourceValue : "");
-		tableToRows.put("measurement", measurement);
-	}
+//	private void addToMeasurement(
+//			long mPersonId,
+//			long measurementConceptId,
+//			String measurementDate,
+//			String measurementTime,
+//			long measurementTypeConceptId,
+//			Long operatorConceptId,
+//			Double valueAsNumber,
+//			Long valueAsConceptId,
+//			Long unitConceptId,
+//			Double rangeLow,
+//			Double rangeHigh,
+//			Long mProviderId,
+//			Long visitOccurrenceId,
+//			String measurementSourceValue,
+//			Long measurementSourceConceptId,
+//			String unitSourceValue,
+//			String valueSourceValue) {
+//		Row measurement = new Row();
+//		measurement.add("measurement_id", ++measurementId);
+//		measurement.add("person_id", mPersonId);
+//		measurement.add("measurement_concept_id", measurementConceptId);
+//		measurement.add("measurement_date", (measurementDate != null ? measurementDate : ""));
+//		measurement.add("measurement_time", (measurementTime != null ? measurementTime : ""));
+//		measurement.add("measurement_type_concept_id", measurementTypeConceptId);
+//		measurement.add("operator_concept_id", (operatorConceptId != null ? operatorConceptId.toString() : ""));
+//		measurement.add("value_as_number", (valueAsNumber != null ? valueAsNumber.toString() : ""));
+//		measurement.add("value_as_concept_id", (valueAsConceptId != null ? valueAsConceptId.toString() : ""));
+//		measurement.add("unit_concept_id", (unitConceptId != null ? unitConceptId.toString() : ""));
+//		measurement.add("range_low", (rangeLow != null ? rangeLow.toString() : ""));
+//		measurement.add("range_high", (rangeHigh != null ? rangeHigh.toString() : ""));
+//		measurement.add("provider_id", (mProviderId != null ? mProviderId.toString() : ""));
+//		measurement.add("visit_occurrence_id", (visitOccurrenceId != null ? visitOccurrenceId.toString() : ""));
+//		measurement.add("measurement_source_value", measurementSourceValue != null ? measurementSourceValue : "");
+//		measurement.add("measurement_source_concept_id", (measurementSourceConceptId != null ? measurementSourceConceptId.toString() : ""));
+//		measurement.add("unit_source_value", unitSourceValue != null ? unitSourceValue : "");
+//		measurement.add("value_source_value", valueSourceValue != null ? valueSourceValue : "");
+//		tableToRows.put("measurement", measurement);
+//	}
 
 	//********************  ********************//
-	private void addToMeasurement(
-			long mPersonId,
-			long measurementConceptId,
-			String measurementDate,
-			long measurementTypeConceptId,
-			Double valueAsNumber,
-			Long valueAsConceptId,
-			Long unitConceptId,
-			Long mProviderId,
-			String measurementSourceValue,
-			String unitSourceValue,
-			String valueSourceValue) {
-		//		addToMeasurement(personId, measurementConceptId, measurementDate, measurementTime, measurementTypeConceptId, operatorConceptId, valueAsNumber, valueAsConceptId, unitConceptId, rangeLow, rangeHigh, providerId, visitOccurrenceId, measurementSourceValue, measurementSourceConceptId, unitSourceValue, valueSourceValue);
-		addToMeasurement(mPersonId, measurementConceptId, measurementDate, null, measurementTypeConceptId, null, valueAsNumber, valueAsConceptId, unitConceptId, null, null, mProviderId, visitOccurrenceId, measurementSourceValue, null, unitSourceValue, valueSourceValue);
-	}
+//	private void addToMeasurement(
+//			long mPersonId,
+//			long measurementConceptId,
+//			String measurementDate,
+//			long measurementTypeConceptId,
+//			Double valueAsNumber,
+//			Long valueAsConceptId,
+//			Long unitConceptId,
+//			Long mProviderId,
+//			String measurementSourceValue,
+//			String unitSourceValue,
+//			String valueSourceValue) {
+//		//		addToMeasurement(personId, measurementConceptId, measurementDate, measurementTime, measurementTypeConceptId, operatorConceptId, valueAsNumber, valueAsConceptId, unitConceptId, rangeLow, rangeHigh, providerId, visitOccurrenceId, measurementSourceValue, measurementSourceConceptId, unitSourceValue, valueSourceValue);
+//		addToMeasurement(mPersonId, measurementConceptId, measurementDate, null, measurementTypeConceptId, null, valueAsNumber, valueAsConceptId, unitConceptId, null, null, mProviderId, visitOccurrenceId, measurementSourceValue, null, unitSourceValue, valueSourceValue);
+//	}
 
 	//********************  ********************//
 	private void addToFact(
@@ -1411,8 +1411,8 @@ public class SwitchboxETLtoV5 {
 			String unitSourceValue,
 			String valueSourceValue) {
 		Row fact = new Row();
-		long returnId = factId;
 		fact.add("fact_id", ++factId);
+		long returnId = factId;
 		fact.add("person_id", fPersonId);
 		fact.add("fact_concept_id", factConceptId);
 		fact.add("fact_date", (factDate != null ? factDate : ""));

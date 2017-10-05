@@ -84,6 +84,7 @@ public class ARSETLv5 {
 	private Map<String, String>			procToType;
 	private CodeToDomainConceptMap		icd9ToConcept;
 	private CodeToDomainConceptMap		icd9ProcToConcept;
+	private CodeToDomainConceptMap		icd10ToConcept;
 	private CodeToConceptMap			specialtyToConcept;
 	private Map<String, Long>			hospRowToVisitOccurrenceId		= new HashMap<String, Long>();
 	private Map<String, Long>			outpatRowToVisitOccurrenceId	= new HashMap<String, Long>();
@@ -168,7 +169,7 @@ public class ARSETLv5 {
 		if (generateQaSamples)
 			qcSampleConstructor.addCdmData(connection, dbSettings.database);
 
-		String etlReportName = etlReport.generateETLReport(icd9ProcToConcept, icd9ToConcept, atcToConcept);
+		String etlReportName = etlReport.generateETLReport(icd9ProcToConcept, icd9ToConcept, icd10ToConcept, atcToConcept);
 		System.out.println("An ETL report was generated and written to :" + etlReportName);
 
 		String etlReportName2 = etlReport.generateETLReport(specialtyToConcept);
@@ -255,6 +256,14 @@ public class ARSETLv5 {
 		for (Row row : connection.queryResource("sql/icd9ProcToProcMeasObsDrugCondition.sql")) {
 			row.upperCaseFieldNames();
 			icd9ProcToConcept.add(row.get("SOURCE_CODE"), row.get("SOURCE_NAME"), row.getInt("SOURCE_CONCEPT_ID"), row.getInt("TARGET_CONCEPT_ID"),
+					row.get("TARGET_CODE"), row.get("TARGET_NAME"), row.get("DOMAIN_ID"));
+		}
+
+		System.out.println("- Loading ICD-10 to concept_id mapping");
+		icd10ToConcept = new CodeToDomainConceptMap("ICD-10 to concept_id mapping", "Condition");
+		for (Row row : connection.queryResource("sql/icd10ToConditionProcMeasObsDevice.sql")) {
+			row.upperCaseFieldNames();
+			icd10ToConcept.add(row.get("SOURCE_CODE"), row.get("SOURCE_NAME"), row.getInt("SOURCE_CONCEPT_ID"), row.getInt("TARGET_CONCEPT_ID"),
 					row.get("TARGET_CODE"), row.get("TARGET_NAME"), row.get("DOMAIN_ID"));
 		}
 
@@ -828,16 +837,19 @@ public class ARSETLv5 {
 		for (Row row : personData.get("DEATH")) {
 			String dateOfDeath = checkDateString(row.get("DATE_OF_DEATH"));
 			if (dateOfDeath.trim().length() != 0) {
-				String altCode = null;
+//				String altCode = null;
 				String causeOfDeathCode = row.get("CAUSE_OF_DEATH");
-				if (causeOfDeathCode.length() == 4 && causeOfDeathCode.charAt(3) == '0') {
-					altCode = causeOfDeathCode.substring(0, 3);
-				}
-				CodeDomainData causeData = icd9ToConcept.getCodeData(causeOfDeathCode);
-				if ((causeData.targetConcepts.get(0).conceptId == 0) && (altCode != null)) {
-					causeData = icd9ToConcept.getCodeData(altCode);
-				}
 				
+				
+//				if (causeOfDeathCode.length() == 4 && causeOfDeathCode.charAt(3) == '0') { // 
+//					altCode = causeOfDeathCode.substring(0, 3);
+//				}
+//				CodeDomainData causeData = icd9ToConcept.getCodeData(causeOfDeathCode);
+//				if ((causeData.targetConcepts.get(0).conceptId == 0) && (altCode != null)) {
+//					causeData = icd9ToConcept.getCodeData(altCode);
+//				}
+				
+				CodeDomainData causeData = getCauseOfDeathConcept(causeOfDeathCode, dateOfDeath);
 				patientToDeathDate.put(personId, dateOfDeath);
 				Row death = new Row();
 				death.add("person_id", personId);
@@ -1061,6 +1073,26 @@ public class ARSETLv5 {
 				}
 			}
 		}
+	}
+	
+	//********************  ********************//
+	private CodeDomainData getCauseOfDeathConcept(String causeOfDeathCode, String deathDate) {
+		String altCode = null;
+		Integer deathYear = Integer.valueOf(deathDate.substring(0,4));
+		CodeDomainData causeData = null;
+
+		if (deathYear < 2010) {
+			if (causeOfDeathCode.length() == 4 && causeOfDeathCode.charAt(3) == '0') { // e.g. 4360 -> 436
+				altCode = causeOfDeathCode.substring(0, 3);
+			}
+			causeData = icd9ToConcept.getCodeData(causeOfDeathCode);
+			if ((causeData.targetConcepts.get(0).conceptId == 0) && (altCode != null)) {
+				causeData = icd9ToConcept.getCodeData(altCode);
+			}
+		} else {
+			causeData = icd10ToConcept.getCodeData(causeOfDeathCode);
+		}
+		return causeData;
 	}
 
 }
