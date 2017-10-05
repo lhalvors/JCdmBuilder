@@ -833,90 +833,55 @@ public class GenomedicsETLtoV5 {
 			etlReport.registerIncomingData(TERAP_TABLE, terapRow);
 			String coAtc = terapRow.get("co_atc");
 			String coCodifa = terapRow.get("co_codifa"); 
+			String startDate = terapRow.get("data_open");
+			Double teNpezzi = null;
+			String tmpS = terapRow.get("te_npezzi");
+			if ((tmpS != null) && (!tmpS.equals("")))
+				teNpezzi = Double.valueOf(tmpS);
+
+			Double euroNum = null;
+			String tmpS2 = terapRow.get("euro_num");
+			if ((tmpS2 != null) && (!tmpS2.equals("")))
+				euroNum = Double.valueOf(tmpS2);
+			
+			Double giorni = codifaToDurgDDD.getGiorni(coCodifa);							
+			String deEndDate = null;
+			int daysSupply = 0;
+			if ((!startDate.equals("")) && (giorni != null) && (teNpezzi != null)) {
+				daysSupply = (int) (teNpezzi * giorni);
+				deEndDate = addDaysToDate(startDate, daysSupply);
+			}
+			
+			Double quantPa = codifaToDurgDDD.getQuantPa(coCodifa);
+			Double unitaPosologica = codifaToDurgDDD.getUnitaPosologica(coCodifa);
+			Double quantity = null;
+			if ((quantPa != null) && (unitaPosologica != null) && (unitaPosologica != 0))
+				quantity = quantPa / unitaPosologica;
+			
+			String sig = terapRow.get("po_des");
+			String via = codifaToDurgDDD.getVia(coCodifa);
+			int routeConceptId = viaToConcept.getConceptId(via);
+
+			Double effectiveDrugDose = null;
+			if ((quantPa != null) && (teNpezzi != null)) 
+				effectiveDrugDose = quantPa * teNpezzi;
+			Long refProviderId = codiceToProviderId.get(codice);
+			
+			String umd = codifaToDurgDDD.getUnitaMisDDD(coCodifa);
+			int unitConceptId = umdToConcept.getConceptId(umd);
+
 			if (coAtc.length() > 0 ) {
 				CodeDomainData data = atcToConcept.getCodeData(coAtc);
 				if (data.sourceConceptId != 0) {
 					for (TargetConcept targetConcept : data.targetConcepts) {
 						String targetDomain = targetConcept.domainId;
 						switch (targetDomain) {
-						case "Drug":
-							Row drugExposure = new Row();
-							drugExposure.add("drug_exposure_id", drugExposureId++);
-							drugExposure.add("person_id", personId);
-							drugExposure.add("drug_concept_id", targetConcept.conceptId);
-							String startDate = terapRow.get("data_open");
-							if (StringUtilities.isDate(startDate))
-								drugExposure.add("drug_exposure_start_date", startDate);
-							else
-								drugExposure.add("drug_exposure_start_date", "");
-
-							Double teNpezzi = null;
-							String tmpS = terapRow.get("te_npezzi");
-							if ((tmpS != null) && (!tmpS.equals("")))
-								teNpezzi = Double.valueOf(tmpS);
-
-							Double euroNum = null;
-							String tmpS2 = terapRow.get("euro_num");
-							if ((tmpS2 != null) && (!tmpS2.equals("")))
-								euroNum = Double.valueOf(tmpS2);
-
-							Double giorni = codifaToDurgDDD.getGiorni(coCodifa);							
-							String deEndDate = null;
-							int daysSupply = 0;
-							if ((!startDate.equals("")) && (giorni != null) && (teNpezzi != null)) {
-								daysSupply = (int) (teNpezzi * giorni);
-								deEndDate = addDaysToDate(startDate, daysSupply);
-								drugExposure.add("drug_exposure_end_date", deEndDate); 								
-							}
-							else
-								drugExposure.add("drug_exposure_end_date", "");
-
-							drugExposure.add("drug_type_concept_id", 38000177);  // Prescription written
-							drugExposure.add("stop_reason", "");
-							drugExposure.add("refills", "");
-							
-							Double quantPa = codifaToDurgDDD.getQuantPa(coCodifa);
-							Double unitaPosologica = codifaToDurgDDD.getUnitaPosologica(coCodifa);
-							if ((quantPa != null) && (unitaPosologica != null) && (unitaPosologica != 0)) {
-								drugExposure.add("quantity", quantPa / unitaPosologica);
-							}
-							else
-								drugExposure.add("quantity", ""); 
-							
-							if (deEndDate != null)
-								drugExposure.add("days_supply", daysSupply);  
-							else
-								drugExposure.add("days_supply", "");  
-							
-							drugExposure.add("sig", terapRow.get("po_des"));
-							
-							String via = codifaToDurgDDD.getVia(coCodifa);
-							int routeConceptId = viaToConcept.getConceptId(via);
-							drugExposure.add("route_concept_id", routeConceptId);
-							
-							if ((quantPa != null) && (teNpezzi != null)) 
-								drugExposure.add("effective_drug_dose", quantPa * teNpezzi);
-							else
-								drugExposure.add("effective_drug_dose", "");
-							
-							String umd = codifaToDurgDDD.getUnitaMisDDD(coCodifa);
-							int unitConceptId = umdToConcept.getConceptId(umd);
-							drugExposure.add("dose_unit_concept_id", unitConceptId);
-							
-							drugExposure.add("lot_number", "");
-							Long refProviderId = codiceToProviderId.get(codice);
-							drugExposure.add("provider_id", (refProviderId != null ? refProviderId.toString() : ""));
-							
-							drugExposure.add("visit_occurrence_id", "");
-							
-							String srcVal = createSourceValue("drug_exposure", "drug_source_value", Long.toString(personId), 50, terapRow.get("co_atc"));
-							drugExposure.add("drug_source_value", srcVal); //TODO: change to co_codifa later
-							drugExposure.add("drug_source_concept_id", data.sourceConceptId);
-							srcVal = createSourceValue("drug_exposure", "route_source_value", Long.toString(personId), 50, codifaToDurgDDD.getVia(coCodifa));
-							drugExposure.add("route_source_value", srcVal); 
-							srcVal = createSourceValue("drug_exposure", "dose_unit_source_value", Long.toString(personId), 50, codifaToDurgDDD.getUnitaMisDDD(coCodifa));
-							drugExposure.add("dose_unit_source_value", srcVal); 
-							tableToRows.put("drug_exposure", drugExposure);
+						case "Drug":					
+							addToDrugExposure(personId, targetConcept.conceptId, startDate, deEndDate, 38000177, null, null,
+									quantity, daysSupply, sig, routeConceptId, effectiveDrugDose, unitConceptId, null,
+									refProviderId, null, createSourceValue("drug_exposure", "drug_source_value", Long.toString(personId), 50, coAtc), 
+									data.sourceConceptId, createSourceValue("drug_exposure", "route_source_value", Long.toString(personId), 50, codifaToDurgDDD.getVia(coCodifa)),
+									createSourceValue("drug_exposure", "dose_unit_source_value", Long.toString(personId), 50, codifaToDurgDDD.getUnitaMisDDD(coCodifa)));
 							numRecs++;
 							
 							// *********** drug_cost ******************
@@ -953,9 +918,24 @@ public class GenomedicsETLtoV5 {
 						}
 					}
 				} else {
-					//etlReport.reportProblem("drug_exposure", "No Standard drug_concept_id available for ATC code "+coAtc, Long.toString(personId));
-					//System.out.println("ATC lookup failed: "+coAtc+", codice: "+codice); 
+					etlReport.reportProblem("drug_exposure", "No Standard drug_concept_id available for ATC code "+coAtc, Long.toString(personId));
+//					System.out.println("ATC lookup failed: "+coAtc+", codice: "+codice); 
+					addToDrugExposure(personId, 0, startDate, deEndDate, 38000177, null, null,
+							quantity, daysSupply, sig, routeConceptId, effectiveDrugDose, unitConceptId, null,
+							refProviderId, null, createSourceValue("drug_exposure", "drug_source_value", Long.toString(personId), 50, coAtc), 
+							0, createSourceValue("drug_exposure", "route_source_value", Long.toString(personId), 50, codifaToDurgDDD.getVia(coCodifa)),
+							createSourceValue("drug_exposure", "dose_unit_source_value", Long.toString(personId), 50, codifaToDurgDDD.getUnitaMisDDD(coCodifa)));
+					numRecs++;
 				}
+			} else {
+				etlReport.reportProblem("drug_exposure", "No ATC code available in source for codice:"+codice, Long.toString(personId));
+//				System.out.println("No ATC code available in source for codice:"+codice); 
+//				addToDrugExposure(personId, 0, startDate, deEndDate, 38000177, null, null,
+//						quantity, daysSupply, sig, routeConceptId, effectiveDrugDose, unitConceptId, null,
+//						refProviderId, null, createSourceValue("drug_exposure", "drug_source_value", Long.toString(personId), 50, coAtc), 
+//						0, createSourceValue("drug_exposure", "route_source_value", Long.toString(personId), 50, codifaToDurgDDD.getVia(coCodifa)),
+//						createSourceValue("drug_exposure", "dose_unit_source_value", Long.toString(personId), 50, codifaToDurgDDD.getUnitaMisDDD(coCodifa)));
+//				numRecs++;
 			}
 		}
 		if (!useBatchInserts) {
@@ -969,6 +949,61 @@ public class GenomedicsETLtoV5 {
 		return numRecs;
 	}
 
+	//********************************************************************************//
+	private void addToDrugExposure(
+			long	aPersonId,
+			int		aDrugConceptId,
+			String	aDrugExposureStartDate,
+			String	aDrugExposureEndDate,
+			int		aDrugTypeConceptId,
+			String	aStopReason,
+			Integer	aRefills,
+			Double	aQuantity,
+			Integer	aDaysSupply,
+			String	aSig,
+			Integer	aRouteConceptId,
+			Double	aEffectiveDrugDose,
+			Integer	aDoseUnitConceptId,
+			String	aLotNumber,
+			Long	aProviderId,
+			Long	aVisitOccurrenceId,
+			String	aDrugSourceValue,
+			Integer	aDrugSourceConceptId,
+			String	aRouteSourceValue,
+			String	aDoseUnitSourceValue) {
+		Row drugExposure = new Row();
+		drugExposure.add("drug_exposure_id", drugExposureId++);
+		drugExposure.add("person_id", aPersonId);
+		drugExposure.add("drug_concept_id", aDrugConceptId);
+		if (StringUtilities.isDate(aDrugExposureStartDate))
+			drugExposure.add("drug_exposure_start_date", aDrugExposureStartDate);
+		else
+			drugExposure.add("drug_exposure_start_date", "");
+
+		if ((aDrugExposureEndDate != null) && (StringUtilities.isDate(aDrugExposureEndDate)))
+			drugExposure.add("drug_exposure_end_date", aDrugExposureEndDate);
+		else
+			drugExposure.add("drug_exposure_end_date", "");
+		drugExposure.add("drug_type_concept_id", aDrugTypeConceptId);  // 38000177: Prescription written
+		drugExposure.add("stop_reason", aStopReason != null ? aStopReason : "");
+		drugExposure.add("refills", (aRefills != null ? aRefills.toString() : ""));
+		drugExposure.add("quantity", (aQuantity != null ? aQuantity.toString() : "")); 
+		drugExposure.add("days_supply", (aDaysSupply != null ? aDaysSupply.toString() : ""));  
+		drugExposure.add("sig", aSig != null ? aSig : "");
+		drugExposure.add("route_concept_id", (aRouteConceptId != null ? aRouteConceptId.toString() : ""));
+		drugExposure.add("effective_drug_dose", (aEffectiveDrugDose != null ? aEffectiveDrugDose.toString() : ""));
+		drugExposure.add("dose_unit_concept_id", (aDoseUnitConceptId != null ? aDoseUnitConceptId.toString() : ""));
+		drugExposure.add("lot_number", aLotNumber != null ? aLotNumber : "");
+		drugExposure.add("provider_id", (aProviderId != null ? aProviderId.toString() : ""));
+		drugExposure.add("visit_occurrence_id", (aVisitOccurrenceId != null ? aVisitOccurrenceId.toString() : ""));
+		drugExposure.add("drug_source_value", aDrugSourceValue != null ? aDrugSourceValue : "");
+		drugExposure.add("drug_source_concept_id", (aDrugSourceConceptId != null ? aDrugSourceConceptId.toString() : ""));
+		drugExposure.add("route_source_value", aRouteSourceValue != null ? aRouteSourceValue : ""); 
+		drugExposure.add("dose_unit_source_value", aDoseUnitSourceValue != null ? aDoseUnitSourceValue : ""); 
+
+		tableToRows.put("drug_exposure", drugExposure);
+	}
+	
 	//********************************************************************************//
 	private long processPressRecords(Row row) {
 		String codice = row.get("codice");
