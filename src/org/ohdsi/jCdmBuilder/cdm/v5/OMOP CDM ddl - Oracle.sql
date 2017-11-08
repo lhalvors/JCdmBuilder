@@ -539,7 +539,7 @@ CREATE TABLE cost  (
      payer_plan_period_id			INTEGER			NULL ,
      amount_allowed		FLOAT			NULL , 
      revenue_code_concept_id		INTEGER			NULL , 
-     reveue_code_source_value    VARCHAR2(50)   NULL
+     revenue_code_source_value    VARCHAR2(50)   NULL
     ) 
 ;
 

@@ -95,8 +95,8 @@ public class SwitchboxETLtoV5 {
 	public static String[]				visitStringFieldsToProcess		= new String[] { "GDS_30_ABNORMAL" };
 	public static boolean				USE_VERBOSE_SOURCE_VALUES		= false;
 
-//	private static String[] 			visits 							= new String[] { "_BASELINE", "_MONTH6", "_MONTH12", "_MONTH18", "_MONTH24", "_MONTH30", "_MONTH36" };  //, "_LAST" };
-//	private static String[] 			normalVisits 					= new String[] { "_MONTH6", "_MONTH12", "_MONTH18", "_MONTH24", "_MONTH30", "_MONTH36" };
+//	private static String[] 			visits 							= new String[] { "_BASELINE", "_MONTH06", "_MONTH12", "_MONTH18", "_MONTH24", "_MONTH30", "_MONTH36" };  //, "_LAST" };
+//	private static String[] 			normalVisits 					= new String[] { "_MONTH06", "_MONTH12", "_MONTH18", "_MONTH24", "_MONTH30", "_MONTH36" };
 
 	private String						folder;
 	private RichConnection				connection;
@@ -432,7 +432,7 @@ public class SwitchboxETLtoV5 {
 				visitFactType = 2000000260;
 				break;
 			case "2":
-				visit = "_MONTH6";
+				visit = "_MONTH06";
 				visitFactType = 2000000261;
 				break;
 			case "3":
