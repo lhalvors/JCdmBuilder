@@ -67,6 +67,8 @@ import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETL;
 import org.ohdsi.jCdmBuilder.etls.hcup.HCUPETLToV5;
 import org.ohdsi.jCdmBuilder.etls.genomedics.GenomedicsETLtoV5;
 import org.ohdsi.jCdmBuilder.etls.switchbox.SwitchboxETLtoV5;
+import org.ohdsi.jCdmBuilder.etls.jacse.JACSEETLtoV5;
+import org.ohdsi.jCdmBuilder.etls.imasis.ImasisETLtoV5;
 import org.ohdsi.jCdmBuilder.vocabulary.CopyVocabularyFromSchema;
 import org.ohdsi.jCdmBuilder.vocabulary.InsertVocabularyInServer;
 import org.ohdsi.utilities.PropertiesManager;
@@ -260,7 +262,7 @@ public class JCdmBuilderMain {
 		targetDatabaseField = new JTextField("");
 		targetPanel.add(targetDatabaseField);
 		targetPanel.add(new JLabel("CDM version"));
-		targetCdmVersion = new JComboBox<String>(new String[] { "4.0", "5.0.1" });
+		targetCdmVersion = new JComboBox<String>(new String[] { "4.0", "5.2.1" });
 		targetCdmVersion.setToolTipText("Select the CMD version");
 		targetCdmVersion.setSelectedIndex(1);
 		
@@ -490,14 +492,16 @@ public class JCdmBuilderMain {
 		etlTypePanel.setLayout(new BoxLayout(etlTypePanel, BoxLayout.X_AXIS));
 		etlTypePanel.setBorder(BorderFactory.createTitledBorder("ETL type"));
 		etlType = new JComboBox<String>(
-				new String[] { "1. Load CSV files in CDM format to server", "2. ARS -> OMOP CDM V4", "3. HCUP -> OMOP CDM V4", "4. HCUP -> OMOP CDM V5", "5. ARS -> OMOP CDM V5", "6. Genomedics -> OMOP CDM V5", "7. Switchbox -> OMOP CDM V5" });
+//				new String[] { "1. Load CSV files in CDM format to server", "2. ARS -> OMOP CDM V4", "3. HCUP -> OMOP CDM V4", "4. HCUP -> OMOP CDM V5", "5. ARS -> OMOP CDM V5", "6. Genomedics -> OMOP CDM V5", "7. Switchbox -> OMOP CDM V5" });
+		new String[] { "1. Load CSV files in CDM format to server", "2. ARS -> OMOP CDM V4", "3. HCUP -> OMOP CDM V4", "4. HCUP -> OMOP CDM V5", "5. ARS -> OMOP CDM V5", "6. Genomedics -> OMOP CDM V5", "7. Switchbox -> OMOP CDM V5", "8. JACSE -> OMOP CDM V5", "9. IMASIS -> OMOP CDM V5" });
 		etlType.setToolTipText("Select the appropriate ETL process");
 		etlType.addItemListener(new ItemListener() {
 			
 			@Override
 			public void itemStateChanged(ItemEvent arg0) {
 				String selection = arg0.getItem().toString();
-				if (selection.equals("1. Load CSV files in CDM format to server") || selection.equals("2. ARS -> OMOP CDM V4") || selection.equals("5. ARS -> OMOP CDM V5") || selection.equals("7. Switchbox -> OMOP CDM V5"))
+//				if (selection.equals("1. Load CSV files in CDM format to server") || selection.equals("2. ARS -> OMOP CDM V4") || selection.equals("5. ARS -> OMOP CDM V5") || selection.equals("7. Switchbox -> OMOP CDM V5") )
+					if (selection.equals("1. Load CSV files in CDM format to server") || selection.equals("2. ARS -> OMOP CDM V4") || selection.equals("5. ARS -> OMOP CDM V5") || selection.equals("7. Switchbox -> OMOP CDM V5") || selection.equals("8. JACSE -> OMOP CDM V5"))
 					((CardLayout) sourceCards.getLayout()).show(sourceCards, SOURCEFOLDER);
 				else
 					((CardLayout) sourceCards.getLayout()).show(sourceCards, SOURCEDATABASE);
@@ -556,7 +560,7 @@ public class JCdmBuilderMain {
 		sourceDatabasePanel.setLayout(new GridLayout(0, 2));
 		sourceDatabasePanel.setBorder(BorderFactory.createTitledBorder("Source database location"));
 		sourceDatabasePanel.add(new JLabel("Data type"));
-		sourceType = new JComboBox<String>(new String[] { "Oracle", "SQL Server", "PostgreSQL" });
+		sourceType = new JComboBox<String>(new String[] { "Oracle", "SQL Server", "PostgreSQL", "MySQL" });
 		sourceType.setToolTipText("Select the source database platform");
 		sourceType.addItemListener(new ItemListener() {
 			
@@ -1050,7 +1054,24 @@ public class JCdmBuilderMain {
 					if (dbSettings != null)
 						etl.process(sourceFolderField.getText(), dbSettings, maxPersons, Integer.parseInt(versionIdField.getText()), executeCdmStructureWhenReady);
 				}
-				
+				if (etlType.getSelectedItem().equals("8. JACSE -> OMOP CDM V5")) {
+					JACSEETLtoV5 etl = new JACSEETLtoV5();
+					DbSettings dbSettings = getTargetDbSettings();
+					testConnection(dbSettings, false);
+					if (dbSettings != null)
+						etl.process(sourceFolderField.getText(), dbSettings, maxPersons, Integer.parseInt(versionIdField.getText()));
+				}
+				if (etlType.getSelectedItem().equals("9. IMASIS -> OMOP CDM V5")) {
+					ImasisETLtoV5 etl = new ImasisETLtoV5();
+					DbSettings sourceDbSettings = getSourceDbSettings();
+					DbSettings targetDbSettings = getTargetDbSettings();
+					if (sourceDbSettings != null && targetDbSettings != null) {
+						testConnection(sourceDbSettings, true);
+						testConnection(targetDbSettings, false);
+						etl.process(folderField.getText(), sourceDbSettings, targetDbSettings, maxPersons, Integer.parseInt(versionIdField.getText()));
+					}
+				}
+
 			} catch (Exception e) {
 				handleError(e);
 			} finally {
@@ -1096,7 +1117,7 @@ public class JCdmBuilderMain {
 				component.setEnabled(false);
 			try {
 				DbSettings dbSettings = getTargetDbSettings();
-				int version = targetCdmVersion.getSelectedItem().equals("5.0.1") ? 5 : 4;
+				int version = targetCdmVersion.getSelectedItem().equals("5.2.1") ? 5 : 4;
 				Cdm.createStructure(dbSettings, version, idsToBigInt);
 			} catch (Exception e) {
 				handleError(e);
@@ -1114,7 +1135,7 @@ public class JCdmBuilderMain {
 				component.setEnabled(false);
 			try {
 				DbSettings dbSettings = getTargetDbSettings();
-				int version = targetCdmVersion.getSelectedItem().equals("5.0.1") ? Cdm.VERSION_5 : Cdm.VERSION_4;
+				int version = targetCdmVersion.getSelectedItem().equals("5.2.1") ? Cdm.VERSION_5 : Cdm.VERSION_4;
 				Cdm.createIndices(dbSettings, version);
 			} catch (Exception e) {
 				handleError(e);
@@ -1141,7 +1162,7 @@ public class JCdmBuilderMain {
 				component.setEnabled(false);
 			try {
 				DbSettings dbSettings = getTargetDbSettings();
-				int version = targetCdmVersion.getSelectedItem().equals("5.0.1") ? EraBuilder.VERSION_5 : EraBuilder.VERSION_4;
+				int version = targetCdmVersion.getSelectedItem().equals("5.2.1") ? EraBuilder.VERSION_5 : EraBuilder.VERSION_4;
 				int domain = type == DRUGS ? EraBuilder.DRUG_ERA : EraBuilder.CONDITION_ERA;
 				EraBuilder.buildEra(dbSettings, version, domain);
 			} catch (Exception e) {

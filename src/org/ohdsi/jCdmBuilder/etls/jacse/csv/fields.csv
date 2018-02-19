@@ -1,0 +1,86 @@
+file,key,field
+patient,lopnr,lopnr
+patient,kon,kon
+patient,foddat,foddat
+drug,edatum,expeditionsdatum
+drug,fdatum,forskrivningsdatum
+drug,antal,antal forpackningar
+drug,lopnr,lopnr
+drug,atc,atc
+drug,lnmn,lnmn
+drug,produkt,produktn
+drug,forpddd,forddd
+drug,fddd,fddd
+drug,forps,forps
+drug,antnum,antnum
+drug,styrkalf,styrkalf
+drug,styrknum,styrknum
+drug,styrkaenhet,styrkaenhet
+drug,subnamn,subnamn
+cancer,lopnr,lopnr
+cancer,kon,kon
+cancer,diadat,diagnodatum
+cancer,icdo3,icd-o/3
+cancer,icdo10,icd-o/2-10
+cancer,icd9,icd-9
+cancer,icd7,icd-7
+cancer,dodsdat,dodsdat
+cancer,diadatn,diadatn
+cancer,dodsdatn,dodsdatn
+cancer,ar,diagnosar
+cancer,tnrmal,"tummornummer, maligna"
+death,lopnr,lopnr
+death,ar,ar
+death,dodsdatn,datum for dodsfall
+death,dodsdat,datum for dodsfall1
+death,alder,alder vid dodsfall
+death,icd,icd-version
+death,ulorsak,underliggande dodsorsak
+death,morsak1,icd-kod for multipel dodsorsak 1
+death,morsak2,icd-kod for multipel dodsorsak 2
+death,morsak3,icd-kod for multipel dodsorsak 3
+death,morsak4,icd-kod for multipel dodsorsak 4
+death,morsak5,icd-kod for multipel dodsorsak 5
+death,morsak6,icd-kod for multipel dodsorsak 6
+death,morsak7,icd-kod for multipel dodsorsak 7
+death,morsak8,icd-kod for multipel dodsorsak 8
+death,morsak9,icd-kod for multipel dodsorsak 9
+death,morsak10,icd-kod for multipel dodsorsak 10
+death,morsak11,icd-kod for multipel dodsorsak 11
+death,morsak12,icd-kod for multipel dodsorsak 12
+death,morsak13,icd-kod for multipel dodsorsak 13
+death,morsak14,icd-kod for multipel dodsorsak 14
+death,morsak15,icd-kod for multipel dodsorsak 15
+death,morsak16,icd-kod for multipel dodsorsak 16
+death,morsak17,icd-kod for multipel dodsorsak 17
+death,morsak18,icd-kod for multipel dodsorsak 18
+death,morsak19,icd-kod for multipel dodsorsak 19
+death,morsak20,icd-kod for multipel dodsorsak 20
+death,morsak21,icd-kod for multipel dodsorsak 21
+death,morsak22,icd-kod for multipel dodsorsak 22
+death,morsak23,icd-kod for multipel dodsorsak 23
+death,morsak24,icd-kod for multipel dodsorsak 24
+death,morsak25,icd-kod for multipel dodsorsak 25
+death,morsak26,icd-kod for multipel dodsorsak 26
+death,morsak27,icd-kod for multipel dodsorsak 27
+death,morsak28,icd-kod for multipel dodsorsak 28
+death,morsak29,icd-kod for multipel dodsorsak 29
+death,morsak30,icd-kod for multipel dodsorsak 30
+death,morsak31,icd-kod for multipel dodsorsak 31
+death,morsak32,icd-kod for multipel dodsorsak 32
+death,morsak33,icd-kod for multipel dodsorsak 33
+death,morsak34,icd-kod for multipel dodsorsak 34
+death,morsak35,icd-kod for multipel dodsorsak 35
+death,morsak36,icd-kod for multipel dodsorsak 36
+death,morsak37,icd-kod for multipel dodsorsak 37
+death,morsak38,icd-kod for multipel dodsorsak 38
+death,morsak39,icd-kod for multipel dodsorsak 39
+death,morsak40,icd-kod for multipel dodsorsak 40
+death,morsak41,icd-kod for multipel dodsorsak 41
+death,morsak42,icd-kod for multipel dodsorsak 42
+death,morsak43,icd-kod for multipel dodsorsak 43
+death,morsak44,icd-kod for multipel dodsorsak 44
+death,morsak45,icd-kod for multipel dodsorsak 45
+death,morsak46,icd-kod for multipel dodsorsak 46
+death,morsak47,icd-kod for multipel dodsorsak 47
+death,morsak48,icd-kod for multipel dodsorsak 48

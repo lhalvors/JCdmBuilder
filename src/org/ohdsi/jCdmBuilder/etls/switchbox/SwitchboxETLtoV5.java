@@ -571,7 +571,7 @@ public class SwitchboxETLtoV5 {
 					tmpS = getRowValue(row, "GDS_SCORE"); 
 					if ((tmpS != null) && (StringUtilities.isNumber(tmpS))) {
 						gdsScore = Double.valueOf(tmpS);
-						addToFact(personId,(long) 2000000113, visitDate, visitFactType, null, gdsScore, null, null, null,  // Geriatric Depression Scale - 30 question version: 2000000113
+						addToFact(personId,(long) 2000000111, visitDate, visitFactType, null, gdsScore, null, null, null,  // Geriatric Depression Scale - 15 question version: 2000000111
 								UNIT_SCORE, null, visitOccurrenceId,"",getField("GDS_SCORE"), null, null, tmpS); 
 					}
 					tmpS = getRowValue(row, "HDS"); 
@@ -717,7 +717,7 @@ public class SwitchboxETLtoV5 {
 							conceptId = (long) 2000000238; // Yes
 						else
 							conceptId = (long) 2000000239; // No
-						addToFact(personId,(long) 2000000114, visitDate, visitFactType, null, null, null, null, conceptId,  // Geriatric Depression Scale - 30 question version abnormality: 2000000114
+						addToFact(personId,(long) 2000000112, visitDate, visitFactType, null, null, null, null, conceptId,  // Geriatric Depression Scale - 15 question version abnormality: 2000000112
 								UNIT_NA, null, visitOccurrenceId,"",getField("GDS_SCORE"), null, null, Double.toString(gdsScore)); 
 					}	
 					

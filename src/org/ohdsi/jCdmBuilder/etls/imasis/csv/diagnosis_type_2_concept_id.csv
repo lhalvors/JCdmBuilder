@@ -1,0 +1,76 @@
+diagnosis_type_id,diagnosis_type,concept_id,concept_name,source_name
+1,D1,38000200,Inpatient header - 1st position,Inpatient header - 1st position
+2,D2,38000201,Inpatient header - 2nd position,Inpatient header - 2nd position
+3,D3,38000202,Inpatient header - 3rd position,Inpatient header - 3rd position
+4,D4,38000203,Inpatient header - 4th position,Inpatient header - 4th position
+5,D5,38000204,Inpatient header - 5th position,Inpatient header - 5th position
+6,D6,38000205,Inpatient header - 6th position,Inpatient header - 6th position
+7,D7,38000206,Inpatient header - 7th position,Inpatient header - 7th position
+8,D8,38000207,Inpatient header - 8th position,Inpatient header - 8th position
+9,D9,38000208,Inpatient header - 9th position,Inpatient header - 9th position
+10,D10,38000209,Inpatient header - 10th position,Inpatient header - 10th position
+11,D11,38000210,Inpatient header - 11th position,Inpatient header - 11th position
+12,D12,38000211,Inpatient header - 12th position,Inpatient header - 12th position
+13,D13,38000212,Inpatient header - 13th position,Inpatient header - 13th position
+14,D14,38000213,Inpatient header - 14th position,Inpatient header - 14th position
+15,D15,38000214,Inpatient header - 15th position,Inpatient header - 15th position
+16,D16,0,Unknown,Inpatient header - 16th position
+17,D17,0,Unknown,Inpatient header - 17th position
+18,D18,0,Unknown,Inpatient header - 18th position
+19,D19,0,Unknown,Inpatient header - 19th position
+20,D20,0,Unknown,Inpatient header - 20th position
+21,E1,38000184,Inpatient detail - 1st position,Inpatient detail - 1st position
+22,E2,38000185,Inpatient detail - 2nd position,Inpatient detail - 2nd position
+23,E3,38000186,Inpatient detail - 3rd position,Inpatient detail - 3rd position
+24,E4,38000187,Inpatient detail - 4th position,Inpatient detail - 4th position
+25,E5,38000188,Inpatient detail - 5th position,Inpatient detail - 5th position
+26,E6,38000189,Inpatient detail - 6th position,Inpatient detail - 6th position
+27,E7,38000190,Inpatient detail - 7th position,Inpatient detail - 7th position
+28,E8,38000191,Inpatient detail - 8th position,Inpatient detail - 8th position
+29,E9,38000192,Inpatient detail - 9th position,Inpatient detail - 9th position
+30,E1S,38000184,Inpatient detail - 1st position,Inpatient detail - 1st position
+31,E2S,38000185,Inpatient detail - 2nd position,Inpatient detail - 2nd position
+32,E3S,38000186,Inpatient detail - 3rd position,Inpatient detail - 3rd position
+33,E4S,38000187,Inpatient detail - 4th position,Inpatient detail - 4th position
+34,E5S,38000188,Inpatient detail - 5th position,Inpatient detail - 5th position
+35,E6S,38000189,Inpatient detail - 6th position,Inpatient detail - 6th position
+36,E7S,38000190,Inpatient detail - 7th position,Inpatient detail - 7th position
+37,E8S,38000191,Inpatient detail - 8th position,Inpatient detail - 8th position
+38,E9S,38000192,Inpatient detail - 9th position,Inpatient detail - 9th position
+39,U1,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+40,U2,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+41,U3,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+42,U4,38000233,Outpatient header - 4th position,Outpatient header - 4th position
+43,U5,38000234,Outpatient header - 5th position,Outpatient header - 5th position
+44,U6,38000235,Outpatient header - 6th position,Outpatient header - 6th position
+45,U7,38000236,Outpatient header - 7th position,Outpatient header - 7th position
+46,U8,38000237,Outpatient header - 8th position,Outpatient header - 8th position
+47,U9,38000238,Outpatient header - 9th position,Outpatient header - 9th position
+48,U1E,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+49,U2E,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+50,U3E,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+51,U4E,38000233,Outpatient header - 4th position,Outpatient header - 4th position
+52,U5E,38000234,Outpatient header - 5th position,Outpatient header - 5th position
+53,U6E,38000235,Outpatient header - 6th position,Outpatient header - 6th position
+54,U7E,38000236,Outpatient header - 7th position,Outpatient header - 7th position
+55,U8E,38000237,Outpatient header - 8th position,Outpatient header - 8th position
+56,U9E,38000238,Outpatient header - 9th position,Outpatient header - 9th position
+57,UE1S,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+58,UE2S,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+59,UE3S,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+60,C1,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+61,C2,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+62,C3,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+63,C4,38000233,Outpatient header - 4th position,Outpatient header - 4th position
+64,CE1,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+65,CE2,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+66,CE3,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+67,CE4,38000233,Outpatient header - 4th position,Outpatient header - 4th position
+68,CE1S,38000230,Outpatient header - 1st position,Outpatient header - 1st position
+69,CE2S,38000231,Outpatient header - 2nd position,Outpatient header - 2nd position
+70,CE3S,38000232,Outpatient header - 3rd position,Outpatient header - 3rd position
+71,CE4S,38000233,Outpatient header - 4th position,Outpatient header - 4th position
+72,CODIAAS,38000230,Outpatient header - 1st position,Outpatient header - 1st position 
+73,DIAGMED,38000230,Outpatient header - 1st position,Outpatient header - 1st position 
+74,DIAGRADC,38000215,Outpatient detail - 1st position,Outpatient detail - 1st position 
+75,INGRES,38000199,Inpatient header - primary,Inpatient header - primary position 

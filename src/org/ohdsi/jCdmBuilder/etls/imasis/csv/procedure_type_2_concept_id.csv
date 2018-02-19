@@ -1,0 +1,42 @@
+procedure_type_id,procedure_type,concept_id,concept_name,source_name
+1,PRNQ1,38000249,Inpatient detail - 1st position,Inpatient detail - 1st position
+2,PRNQ2,0,unknown,Inpatient detail - 2nd position
+3,PRNQ3,0,unknown,Inpatient detail - 3rd position
+4,PRNQ4,0,unknown,Inpatient detail - 4th position
+5,PRNQ5,0,unknown,Inpatient detail - 5th position
+6,PRNQ6,0,unknown,Inpatient detail - 6th position
+7,PRNQ7,0,unknown,Inpatient detail - 7th position
+8,PRNQ8,0,unknown,Inpatient detail - 8th position
+9,PRNQ9,0,unknown,Inpatient detail - 9th position
+10,PRNQ10,0,unknown,Inpatient detail - 10th position
+11,PROQ1,38000251,Inpatient header - 1st position,Inpatient header - 1st position
+12,PROQ2,38000252,Inpatient header - 2nd position,Inpatient header - 2nd position
+13,PROQ3,38000253,Inpatient header - 3rd position,Inpatient header - 3rd position
+14,PROQ4,38000254,Inpatient header - 4th position,Inpatient header - 4th position
+15,PROQ5,38000255,Inpatient header - 5th position,Inpatient header - 5th position
+16,PROQ6,38000256,Inpatient header - 6th position,Inpatient header - 6th position
+17,PROQ7,38000257,Inpatient header - 7th position,Inpatient header - 7th position
+18,PROQ8,38000258,Inpatient header - 8th position,Inpatient header - 8th position
+19,PROQ9,38000259,Inpatient header - 9th position,Inpatient header - 9th position
+20,PROQ10,0,unknown,Inpatient header - 10th position
+21,PRQE1,38000249,Inpatient detail - 1st position,Inpatient detail - 1st position
+22,PRQE2,0,unknown,Inpatient detail - 2nd position
+23,PRQE3,0,unknown,Inpatient detail - 3rd position
+24,PRQE4,0,unknown,Inpatient detail - 4th position
+25,PRQE5,0,unknown,Inpatient detail - 5th position
+26,PRQE6,0,unknown,Inpatient detail - 6th position
+27,PRQE7,0,unknown,Inpatient detail - 7th position
+28,PRQE8,0,unknown,Inpatient detail - 8th position
+29,PRQE9,0,unknown,Inpatient detail - 9th position
+30,PRQE10,0,unknown,Inpatient detail - 10th position
+31,PROCU1,38000269,Outpatient header - 1st position,Outpatient header - 1st position
+32,PROCU2,38000270,Outpatient header - 2nd position,Outpatient header - 2nd position
+33,PROCU3,38000271,Outpatient header - 3rd position,Outpatient header - 3rd position
+34,PROCU4,38000272,Outpatient header - 4th position,Outpatient header - 4th position
+35,PROCU5,38000273,Outpatient header - 5th position,Outpatient header - 5th position
+36,PROCU6,38000274,Outpatient header - 6th position,Outpatient header - 6th position
+37,PROCU7,0,unknown,Outpatient header - 7th position
+38,PROCU8,0,unknown,Outpatient header - 8th position
+39,PROCU9,0,unknown,Outpatient header - 9th position
+40,PROCU10,0,unknown,Outpatient header - 10th position
+41,INGRES,38000250,Inpatient header - primary position,Inpatient header - primary position 
