@@ -92,6 +92,9 @@ public class SwitchboxETLtoV5 {
 			"CATEGORY_FLUENCY_SUM", "FAQ", "GDS_SCORE", "MMSE_TOTAL", "PRIORITY_ATTENTION", "PRIORITY_ATTENTION_Z_SCORE", "PRIORITY_EXECUTIVE", "PRIORITY_EXECUTIVE_Z_SCORE", 
 			"PRIORITY_LANGUAGE", "PRIORITY_MEMORY_DELAYED", "PRIORITY_MEMORY_DELAYED_Z_SCORE", "PRIORITY_MEMORY_IMMEDIATE", "PRIORITY_MEMORY_IMMEDIATE_Z_SCORE", 
 			"TMTA", "TMTA_Z_SCORE", "TMTB", "TMTB_Z_SCORE" };
+	public static String[]				diagnosisKeys					= new String[] {"ANGINA_PECTORIS", "BLEEDING", "CAROTID_STENOSIS", "COPD", "CORONARY_BYPASS", "DELIRIUM",
+			"DEPRESSION", "DIABETES_MELLITUS", "DOTTER_STENT", "HYPERTENSION", "HYPERTHYROIDISM", "HYPOTHYROIDISM", "KIDNEY", "LIVER", "MYOCARDIAL_INFARCTION", 
+			"OTHER_CARDIOVASCULAR", "OTHER_CEREBROVASCULAR", "OTHER_ENDOCRINE", "OTHER_PSYCHIATRIC", "OTHER_SOMATIC","TIA"};
 	public static String[]				visitStringFieldsToProcess		= new String[] { "GDS_30_ABNORMAL" };
 	public static boolean				USE_VERBOSE_SOURCE_VALUES		= false;
 
@@ -511,6 +514,7 @@ public class SwitchboxETLtoV5 {
 					Double animalFluency1min = null;
 					Double npiQTotal = null;
 					Double iadlTotal = null;
+					Double geometricFiguesCopyRaw = null;
 					String diagnosisCode = null;
 					
 					// ========== Education ==========
@@ -720,6 +724,17 @@ public class SwitchboxETLtoV5 {
 						addToFact(personId,(long) 2000000112, visitDate, visitFactType, null, null, null, null, conceptId,  // Geriatric Depression Scale - 15 question version abnormality: 2000000112
 								UNIT_NA, null, visitOccurrenceId,"",getField("GDS_SCORE"), null, null, Double.toString(gdsScore)); 
 					}	
+					
+					String sMeander = getRowValue(row, "MEANDER");
+					String sKubus9 = getRowValue(row, "KUBUS9");
+					String sKubus12 = getRowValue(row, "KUBUS12");
+					String sHoningraat = getRowValue(row, "HONINGRAAT");
+					if ((sMeander != null) && (StringUtilities.isNumber(sMeander)) && (sKubus9 != null) && (StringUtilities.isNumber(sKubus9)) && (sKubus12 != null) && (StringUtilities.isNumber(sKubus12)) && (sHoningraat != null) && (StringUtilities.isNumber(sHoningraat))) {
+						geometricFiguesCopyRaw = Double.valueOf(sMeander)+Double.valueOf(sKubus9)+Double.valueOf(sKubus12)+Double.valueOf(sHoningraat);
+						addToFact(personId,(long) 2000000474, visitDate, visitFactType, null, geometricFiguesCopyRaw, null, null, null,  // Geometric Figures Copy Raw: 2000000474
+								UNIT_SCORE, null, visitOccurrenceId,"",sMeander+","+sKubus9+","+sKubus12+","+sHoningraat, null, null, geometricFiguesCopyRaw.toString()); 
+					}
+
 					
 					// ========== Calculations ==========
 					Long genderConceptId = personIdToGenderConceptId.get(personId);
@@ -947,6 +962,29 @@ public class SwitchboxETLtoV5 {
 						addToFact(personId,(long) 2000000063, visitDate, visitFactType, null, null, null, null, conceptId,  // Cognitive disorder diagnosis: 2000000063
 								UNIT_NA, null, visitOccurrenceId,"",getField("DIAGNOSIS"), null, null, diagnosisCode); 
 					}
+					
+					for (String key : diagnosisKeys) {
+						String fieldCode = getField(key);
+						tmpS = row.get(fieldCode);
+						if ((tmpS != null) && (!tmpS.equals(""))) {
+							Long yesNoConceptId = null;
+							switch (tmpS) {
+							case "1":
+								yesNoConceptId = (long) 2000000238; // Yes
+								break;
+							case "2":
+								yesNoConceptId = (long) 2000000239; // No
+								break;
+							}
+							if (yesNoConceptId != null) {
+								conceptId = diagnosisCodeToConcept.get(key.toLowerCase());
+								if (conceptId > 0)
+									addToFact(personId,conceptId, visitDate, visitFactType, null, null, null, null, yesNoConceptId,  // Cognitive disorder diagnosis: 2000000063
+											UNIT_NA, null, visitOccurrenceId,"",fieldCode, null, null, key); 							
+							}
+						}
+					}
+					
 					// ========== Assignments - Priority tests ==========
 					// Priority attention
 					String paRef = null;
@@ -1127,6 +1165,14 @@ public class SwitchboxETLtoV5 {
 									UNIT_SCORE, null, visitOccurrenceId,"",getField(pmD_Ref), null, null, getRowValue(row, pmD_Ref)); 
 							addToFactAttribute(pmD_ZFactId,null,null,null,pmD_ZConceptId,null,(long) 2000000285,null,pmD_ZRef,null,null,null);
 						}
+					}
+					
+					// Priority Visuoconstruction
+					Long pv_FactId = null;
+					if (geometricFiguesCopyRaw != null) {
+						pv_FactId = addToFactGetId(personId,(long) 2000000419, visitDate, visitFactType, null, geometricFiguesCopyRaw, null, null, null,  // Priority Visuoconstruction: 2000000419
+								UNIT_SCORE, null, visitOccurrenceId,"","MEANDER+KUBUS9+KUBUS12+HONINGRAAT", null, null, geometricFiguesCopyRaw.toString()); 
+						addToFactAttribute(pv_FactId,null,null,null,(long) 2000000474,null,(long) 2000000286,null,"MEANDER+KUBUS9+KUBUS12+HONINGRAAT",null,null,null);
 					}
 
 					// ========== Measurements ==========
