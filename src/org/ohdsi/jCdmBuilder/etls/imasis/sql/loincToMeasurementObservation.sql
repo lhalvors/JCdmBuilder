@@ -1,17 +1,17 @@
-SELECT 
-	REPLACE(loinc.concept_code, '.', '') AS source_code,
-	loinc.concept_name AS source_name,
-	loinc.concept_id AS source_concept_id,
-	standard.concept_code AS target_code,
-	standard.concept_name AS target_name,
-	standard.concept_id AS target_concept_id,
+select 
+	replace(loinc.concept_code, '.', '') as source_code,
+	loinc.concept_name as source_name,
+	loinc.concept_id as source_concept_id,
+	standard.concept_code as target_code,
+	standard.concept_name as target_name,
+	standard.concept_id as target_concept_id,
 	standard.domain_id
-FROM concept loinc
-INNER JOIN concept_relationship
-	ON loinc.concept_id = concept_id_1
-INNER JOIN concept standard
-	ON standard.concept_id = concept_id_2
-WHERE loinc.vocabulary_id = 'LOINC'
-	AND standard.standard_concept = 'S'
-	AND relationship_id = 'Maps to'
-	AND (concept_relationship.invalid_reason IS NULL OR concept_relationship.invalid_reason = '')
+from concept loinc
+inner join concept_relationship
+	on loinc.concept_id = concept_id_1
+inner join concept standard
+	on standard.concept_id = concept_id_2
+where loinc.vocabulary_id = 'loinc'
+	and standard.standard_concept = 's'
+	and relationship_id = 'maps to'
+	and (concept_relationship.invalid_reason is null or concept_relationship.invalid_reason = '')

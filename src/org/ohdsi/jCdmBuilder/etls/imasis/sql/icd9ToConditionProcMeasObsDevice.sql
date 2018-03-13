@@ -1,17 +1,17 @@
-SELECT 
-	icd9.concept_code AS source_code,
-	icd9.concept_name AS source_name,
-	icd9.concept_id AS source_concept_id,
-	standard.concept_code AS target_code,
-	standard.concept_name AS target_name,
-	standard.concept_id AS target_concept_id,
+select 
+	icd9.concept_code as source_code,
+	icd9.concept_name as source_name,
+	icd9.concept_id as source_concept_id,
+	standard.concept_code as target_code,
+	standard.concept_name as target_name,
+	standard.concept_id as target_concept_id,
 	standard.domain_id
-FROM concept icd9
-INNER JOIN concept_relationship
-	ON icd9.concept_id = concept_id_1
-INNER JOIN concept standard
-	ON standard.concept_id = concept_id_2
-WHERE icd9.vocabulary_id = 'ICD9CM'
-	AND standard.standard_concept = 'S'
-	AND relationship_id = 'Maps to'
-	AND (concept_relationship.invalid_reason IS NULL OR concept_relationship.invalid_reason = '')
+from concept icd9
+inner join concept_relationship
+	on icd9.concept_id = concept_id_1
+inner join concept standard
+	on standard.concept_id = concept_id_2
+where icd9.vocabulary_id = 'icd9cm'
+	and standard.standard_concept = 's'
+	and relationship_id = 'maps to'
+	and (concept_relationship.invalid_reason is null or concept_relationship.invalid_reason = '')

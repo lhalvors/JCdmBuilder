@@ -1,4 +1,4 @@
-INSERT INTO cdm_source (
+insert into cdm_source (
 	cdm_source_name,
 	cdm_source_abbreviation,
 	cdm_holder,
@@ -10,14 +10,14 @@ INSERT INTO cdm_source (
 	cdm_version,
 	vocabulary_version
 	)
-VALUES (
-	'L’Institut d’Assistència Sanitària',
-	'IMASIS',
+values (
+	'l’institut d’assistència sanitària',
+	'imasis',
 	'',
 	'',
 	'',
 	'https://jjcloud.box.com/v/imasis',
-	NULL,
+	null,
 	'@today',
 	'5.2.1',
 	'@vocab'

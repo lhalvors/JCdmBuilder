@@ -166,7 +166,7 @@ public class ImasisETLtoV5 {
 		//		MultiRowIterator iterator = constructMultiRowIterator();
 		long personRecordsInBatch = 0;
 
-		for (Row row : sourceConnection.query("SELECT * FROM patient WHERE gender IS NOT NULL AND birth_date IS NOT NULL")) {
+		for (Row row : sourceConnection.query("select * from patient where gender is not null and birth_date is not null")) {
 			processPatientSourceRecord(row);
 			personRecordsInBatch++;
 
@@ -566,18 +566,6 @@ public class ImasisETLtoV5 {
 		person.add("ethnicity_source_value", "");
 		person.add("ethnicity_source_concept_id", "");
 		tableToRows.put("person", person);
-//		s2t.add("", 					// srcInstance
-//				"patient", 				// srcTable
-//				Long.toString(personId),// srcCode
-//				dateOfBirth, 			// srcName
-//				"", 					// srcVocabulary
-//				null, 					// srcConceptId
-//				"person",				// trgTable
-//				Long.toString(personId),// trgCode
-//				"", 					// trgName
-//				"", 					// trgDomain
-//				"", 					// trgVocabulary
-//				(long) 0);				// trgConceptId
 
 		// ** CREATE death record, if death is indicated
 		String ageAtDeath = row.get("death_age");
@@ -591,18 +579,6 @@ public class ImasisETLtoV5 {
 			death.add("cause_source_value", "");
 			death.add("cause_source_concept_id", "");
 			tableToRows.put("death", death);
-//			s2t.add("", 					// srcInstance
-//					"patient", 				// srcTable
-//					Long.toString(personId),// srcCode
-//					dateOfBirth, 			// srcName
-//					"", 					// srcVocabulary
-//					null, 					// srcConceptId
-//					"death",				// trgTable
-//					Long.toString(personId),// trgCode
-//					deathDate, 				// trgName
-//					"", 					// trgDomain
-//					"", 					// trgVocabulary
-//					(long) 0);				// trgConceptId
 		}
 
 		return true;
@@ -612,7 +588,7 @@ public class ImasisETLtoV5 {
 	private long processPatientMeasures(Row row) {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
-		for (Row measureRow : sourceConnection.query("SELECT * FROM patient_measures WHERE patient_id = '" + patientId + "'")) {
+		for (Row measureRow : sourceConnection.query("select * from patient_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_measures", measureRow);
 
 			String measureDate = measureRow.get("measurement_date");
@@ -686,7 +662,7 @@ public class ImasisETLtoV5 {
 	private long processPatientPressureMeasures(Row row) {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
-		for (Row measureRow : sourceConnection.query("SELECT * FROM patient_pressure_measures WHERE patient_id = '" + patientId + "'")) {
+		for (Row measureRow : sourceConnection.query("select * from patient_pressure_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_pressure_measures", measureRow);
 			String measureDate = measureRow.get("measurement_date");
 			String measureTime = measureRow.get("measurement_hour");
@@ -745,7 +721,7 @@ public class ImasisETLtoV5 {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
 
-		for (Row visitRow : sourceConnection.query("SELECT * FROM visit WHERE patient_id = '" + patientId + "'")) {
+		for (Row visitRow : sourceConnection.query("select * from visit where patient_id = '" + patientId + "'")) {
 			String startDate = visitRow.get("start_date");
 			String endDate = visitRow.get("end_date");
 			if (StringUtilities.isDate(startDate)) {
@@ -782,18 +758,6 @@ public class ImasisETLtoV5 {
 					}
 					addToVisitOccurrence(visitid, startDate, endDate, visitConceptId, (long) 44818518, // 44818518: Visit derived from EHR record
 							refCareSiteId, refProviderId, tmpS);
-//					s2t.add("", 					// srcInstance
-//							"visit",				// srcTable
-//							Long.toString(personId),// srcCode
-//							startDate, 				// srcName
-//							"", 					// srcVocabulary
-//							null, 					// srcConceptId
-//							"visit_occurrence",		// trgTable
-//							Long.toString(visitid),	// trgCode
-//							startDate,				// trgName
-//							"Measurement",			// trgDomain
-//							"LOINC", 				// trgVocabulary
-//							(long) 44818518);		// trgConceptId
 					numRecs++;
 				}
 			}
@@ -915,7 +879,7 @@ public class ImasisETLtoV5 {
 	private long processVisitPeriodRecords(Row row) {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
-		for (Row periodRow : sourceConnection.query("SELECT * FROM visit_period WHERE patient_id = '" + patientId + "'")) {
+		for (Row periodRow : sourceConnection.query("select * from visit_period where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_period", periodRow);
 			Long visitPeriodId = periodRow.getLong("visit_period_id");
 			String startDate = periodRow.get("start_date");
@@ -936,18 +900,6 @@ public class ImasisETLtoV5 {
 				}
 				observationPeriod.add("period_type_concept_id", 44814724); // Period covering healthcare encounters
 				tableToRows.put("observation_period", observationPeriod);
-//				s2t.add("", 					// srcInstance
-//						"visit_period", 		// srcTable
-//						Long.toString(visitPeriodId),// srcCode
-//						startDate, 				// srcName
-//						"", 					// srcVocabulary
-//						null, 					// srcConceptId
-//						"observation_period",	// trgTable
-//						Long.toString(visitPeriodId),// trgCode
-//						startDate, 				// trgName
-//						"", 					// trgDomain
-//						"", 					// trgVocabulary
-//						(long) 0);				// trgConceptId
 			}
 			numRecs++;
 		}
@@ -957,7 +909,7 @@ public class ImasisETLtoV5 {
 	private long processVisitAnnotationsRecords(Row row) {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
-		for (Row annotationRow : sourceConnection.query("SELECT * FROM visit_annotations WHERE patient_id = '" + patientId + "'")) {
+		for (Row annotationRow : sourceConnection.query("select * from visit_annotations where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_annotations", annotationRow);
 			Long refProviderId = serviceToProviderId.get(annotationRow.getLong("service_id"));
 			String tmpS = annotationRow.get("visit_annotations_id");
@@ -988,18 +940,6 @@ public class ImasisETLtoV5 {
 					note.add("visit_occurrence_id", (visitId != null ? visitId.toString() : ""));
 					note.add("note_source_value", visitAnnotationsId.toString());
 					tableToRows.put("note", note);
-//					s2t.add("", 					// srcInstance
-//							"visit_annotations", 	// srcTable
-//							Long.toString(visitAnnotationsId),// srcCode
-//							annotationDate, 		// srcName
-//							"", 					// srcVocabulary
-//							null, 					// srcConceptId
-//							"note",					// trgTable
-//							Long.toString(visitAnnotationsId),// trgCode
-//							annotationDate, 		// trgName
-//							"", 					// trgDomain
-//							"", 					// trgVocabulary
-//							(long) 0);				// trgConceptId
 				}
 				numRecs++;
 			}
@@ -1011,10 +951,10 @@ public class ImasisETLtoV5 {
 	private long processDiagnosis(Row row) {
 		String patientId = row.get("patient_id");
 		long numRecs = 0;
-		String qry = "SELECT d.diagnosis_id, d.visit_id, d.patient_id, dt.diagnosis_type, d.diagnosis_date, ";
-		qry += "d.icd9cm_code_id FROM diagnosis d \n";
+		String qry = "select d.diagnosis_id, d.visit_id, d.patient_id, dt.diagnosis_type, d.diagnosis_date, ";
+		qry += "d.icd9cm_code_id from diagnosis d \n";
 		qry += "left join diagnosis_type dt on dt.diagnosis_type_id=d.diagnosis_type_id\n";
-		qry += "WHERE d.patient_id = " + patientId;
+		qry += "where d.patient_id = " + patientId;
 		for (Row diagnosisRow : sourceConnection.query(qry)) {
 			etlReport.registerIncomingData("diagnosis", diagnosisRow);
 			String diagnosisId = diagnosisRow.get("diagnosis_id");
@@ -1163,10 +1103,10 @@ public class ImasisETLtoV5 {
 		private long processProcedures(Row row) {
 			String patientId = row.get("patient_id");
 			long numRecs = 0;
-			String qry = "SELECT p.procedures_id, p.patient_id, p.visit_id, p.procedure_code, pt.procedure_type, v.end_date, v.service_id FROM procedures p\n";
+			String qry = "select p.procedures_id, p.patient_id, p.visit_id, p.procedure_code, pt.procedure_type, v.end_date, v.service_id from procedures p\n";
 			qry += "left join visit v on p.visit_id=v.visit_id\n";
 			qry += "left join procedure_type pt on p.procedure_type_id=pt.procedure_type_id\n";
-			qry += "WHERE p.patient_id = " + patientId;
+			qry += "where p.patient_id = " + patientId;
 			for (Row procedureRow : sourceConnection.query(qry)) {
 				etlReport.registerIncomingData("procedures", procedureRow);
 				long procOccurId = procedureRow.getLong("procedures_id");
@@ -1376,7 +1316,7 @@ public class ImasisETLtoV5 {
 		
 		//********************************************************************************//
 	private void processServiceRecords() {
-		for (Row serviceRow : sourceConnection.query("SELECT * FROM services")) {
+		for (Row serviceRow : sourceConnection.query("select * from services")) {
 			Long serviceId = serviceRow.getLong("service_id");
 			String description = serviceRow.get("description");
 			Long refProviderId = serviceToProviderId.get(serviceId);
@@ -1389,18 +1329,6 @@ public class ImasisETLtoV5 {
 				provider.add("gender_concept_id", 8551);  // Unknown
 				provider.add("provider_source_value", serviceId);
 				tableToRows.put("provider", provider);
-//				s2t.add("", 					// srcInstance
-//						"services", 			// srcTable
-//						Long.toString(serviceId),// srcCode
-//						description, 			// srcName
-//						"", 					// srcVocabulary
-//						null, 					// srcConceptId
-//						"provider",				// trgTable
-//						Long.toString(serviceId),// trgCode
-//						description, 			// trgName
-//						"", 					// trgDomain
-//						"", 					// trgVocabulary
-//						(long) 0);				// trgConceptId
 			}
 		}
 		for (Row serviceRow : sourceConnection.query("select distinct(service_id) as service_id from visit")) {
@@ -1415,18 +1343,6 @@ public class ImasisETLtoV5 {
 				provider.add("gender_concept_id", 8551);  // Unknown
 				provider.add("provider_source_value", serviceId);
 				tableToRows.put("provider", provider);
-//				s2t.add("", 					// srcInstance
-//						"visit", 				// srcTable
-//						Long.toString(serviceId),// srcCode
-//						"", 					// srcName
-//						"", 					// srcVocabulary
-//						null, 					// srcConceptId
-//						"provider",				// trgTable
-//						Long.toString(serviceId),// trgCode
-//						"", 					// trgName
-//						"", 					// trgDomain
-//						"", 					// trgVocabulary
-//						(long) 0);				// trgConceptId
 			}
 		}
 
@@ -1436,7 +1352,7 @@ public class ImasisETLtoV5 {
 	private long processGeographicalNameRecords() {
 		long numRecs = 0;
 
-		for (Row geoRow : sourceConnection.query("SELECT * FROM GEOGRAPHICAL_NAME")) {
+		for (Row geoRow : sourceConnection.query("select * from geographical_name")) {
 			etlReport.registerIncomingData("geographical_name", geoRow);
 			String geoNameId = geoRow.get("geographical_name_id").trim();
 			String name = geoRow.get("name").trim();
@@ -1454,18 +1370,6 @@ public class ImasisETLtoV5 {
 					location.add("county", "");
 					location.add("location_source_value", name);
 					tableToRows.put("location", location);
-//					s2t.add("", 					// srcInstance
-//							"geographical_name", 	// srcTable
-//							geoNameId,				// srcCode
-//							name, 					// srcName
-//							"", 					// srcVocabulary
-//							null, 					// srcConceptId
-//							"location",				// trgTable
-//							Long.toString(locationId),// trgCode
-//							"", 					// trgName
-//							"", 					// trgDomain
-//							"", 					// trgVocabulary
-//							(long) 0);				// trgConceptId
 					numRecs++;
 				}
 			}
@@ -1477,7 +1381,7 @@ public class ImasisETLtoV5 {
 	private long processVisitHospitalRecords() {
 		long numRecs = 0;
 
-		for (Row hospRow : sourceConnection.query("SELECT * FROM VISIT_HOSPITAL")) {
+		for (Row hospRow : sourceConnection.query("select * from visit_hospital")) {
 			etlReport.registerIncomingData("hospital", hospRow);
 			String visitHospId = hospRow.get("visit_hospital_id").trim();
 			String name = hospRow.get("visit_hospital_label").trim();
