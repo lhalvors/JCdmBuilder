@@ -471,7 +471,7 @@ public class ImasisETLtoV5 {
 
 	//******************** processPatientSourceRecord ********************//
 	private void processPatientSourceRecord(Row row) {
-		String tmpS = row.get("patient_id");
+		String tmpS = row.get("patient_id").replaceAll("\u0000", "");
 		if ((tmpS.length() > 0) && (StringUtilities.isNumber(tmpS))) {
 			etlReport.registerIncomingData("patient", row);
 			personId = getLongValue(tmpS);
@@ -515,9 +515,9 @@ public class ImasisETLtoV5 {
 	private boolean addPersonAndDeathRecords(Row row) {
 		Row person = new Row();
 		person.add("person_id", personId);
-		String genderSrc = row.get("gender");
+		String genderSrc = row.get("gender").replaceAll("\u0000", "");
 		person.add("gender_concept_id", genderSrc.equals("F") ? "8532" : genderSrc.equals("M") ? "8507" : "8551");
-		String dateOfBirth = row.get("birth_date");  // Date format: YYYY-MM-DD
+		String dateOfBirth = row.get("birth_date").replaceAll("\u0000", "");  // Date format: YYYY-MM-DD
 		if (dateOfBirth.length() < 10) {
 			person.add("year_of_birth", "");
 			person.add("month_of_birth", "");
@@ -554,7 +554,7 @@ public class ImasisETLtoV5 {
 		}
 		person.add("race_concept_id", 8552);	// Unknown (race)
 		person.add("ethnicity_concept_id", 0); // No matching concept
-		Long locId = geographicalNameToProviderId.get(row.get("birth_place"));
+		Long locId = geographicalNameToProviderId.get(row.get("birth_place").replaceAll("\u0000", ""));
 		person.add("location_id", (locId != null ? locId.toString() : ""));
 		person.add("provider_id", "");
 		person.add("care_site_id", "");
@@ -568,7 +568,7 @@ public class ImasisETLtoV5 {
 		tableToRows.put("person", person);
 
 		// ** CREATE death record, if death is indicated
-		String ageAtDeath = row.get("death_age");
+		String ageAtDeath = row.get("death_age").replaceAll("\u0000", "");
 		if ((ageAtDeath.length() > 0) && (StringUtilities.isNumber(ageAtDeath)) && (dateOfBirth.length() == 10)) {
 			String deathDate = addDaysToDate(dateOfBirth, (365 * Integer.valueOf(ageAtDeath)));
 			Row death = new Row();
@@ -586,22 +586,22 @@ public class ImasisETLtoV5 {
 
 	//********************************************************************************//
 	private long processPatientMeasures(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 		for (Row measureRow : sourceConnection.query("select * from patient_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_measures", measureRow);
 
-			String measureDate = measureRow.get("measurement_date");
+			String measureDate = measureRow.get("measurement_date").replaceAll("\u0000", "");
 			Long visitOccId = null;          //TODO: visit_occurrence_id !!!!!!!!!!!!!!!!!!!!!!
 			if (StringUtilities.isDate(measureDate)) {
 				Long tmpL = null;
 
-				String tmpS = measureRow.get("weight");
+				String tmpS = measureRow.get("weight").replaceAll("\u0000", "");
 				Double weight = getNumValue(tmpS);
 				if (weight != null) {
 					tmpL = addToMeasurement(personId, (long) 3025315, measureDate, measureDate, 44818701, // 3025315: weight, 44818701: from physical examination
 							weight, null, (long) 9529, null, visitOccurrenceId, "weight", null, tmpS);  // 9529: kilogram
-					s2t.add(measureRow.get("patient_measure_id"),// srcInstance
+					s2t.add(measureRow.get("patient_measure_id").replaceAll("\u0000", ""),// srcInstance
 							"patient_measures",		// srcTable
 							"weight",				// srcCode
 							"", 					// srcName
@@ -615,12 +615,12 @@ public class ImasisETLtoV5 {
 							(long) 3025315);		// trgConceptId
 					numRecs++;
 				}
-				tmpS = measureRow.get("height");
+				tmpS = measureRow.get("height").replaceAll("\u0000", "");
 				Double height = getNumValue(tmpS);
 				if (height != null) {
 					tmpL = addToMeasurement(personId, (long) 3036277, measureDate, measureDate, 44818701, // 3036277: height, 44818701: from physical examination
 							height, null, (long) 8582, null, visitOccurrenceId, "height", null, tmpS);  // 8582: centimeter
-					s2t.add(measureRow.get("patient_measure_id"),// srcInstance
+					s2t.add(measureRow.get("patient_measure_id").replaceAll("\u0000", ""),// srcInstance
 							"patient_measures",		// srcTable
 							"height",				// srcCode
 							"", 					// srcName
@@ -634,12 +634,12 @@ public class ImasisETLtoV5 {
 							(long) 3036277);		// trgConceptId
 					numRecs++;
 				}
-				tmpS = measureRow.get("bmi");
+				tmpS = measureRow.get("bmi").replaceAll("\u0000", "");
 				Double imc = getNumValue(tmpS);
 				if (imc != null) {
 					tmpL = addToMeasurement(personId, (long) 3038553, measureDate, measureDate, 44818701, // 3038553: body mass index, 44818701: from physical examination
 							imc, null, (long) 9531, null, visitOccurrenceId, "bmi", null, tmpS);  // 9531: kg/m2
-					s2t.add(measureRow.get("patient_measure_id"),// srcInstance
+					s2t.add(measureRow.get("patient_measure_id").replaceAll("\u0000", ""),// srcInstance
 							"patient_measures",		// srcTable
 							"bmi",					// srcCode
 							"", 					// srcName
@@ -660,12 +660,12 @@ public class ImasisETLtoV5 {
 	
 	//********************************************************************************//
 	private long processPatientPressureMeasures(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 		for (Row measureRow : sourceConnection.query("select * from patient_pressure_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_pressure_measures", measureRow);
-			String measureDate = measureRow.get("measurement_date");
-			String measureTime = measureRow.get("measurement_hour");
+			String measureDate = measureRow.get("measurement_date").replaceAll("\u0000", "");
+			String measureTime = measureRow.get("measurement_hour").replaceAll("\u0000", "");
 			String measureDateTime = measureDate;
 			if (measureTime != null)
 				measureDateTime += " " + measureTime;
@@ -673,12 +673,12 @@ public class ImasisETLtoV5 {
 			if (StringUtilities.isDate(measureDate)) {
 				Long tmpL = null;
 
-				String tmpS = measureRow.get("systolic_pressure");
+				String tmpS = measureRow.get("systolic_pressure").replaceAll("\u0000", "");
 				Double systolic = getNumValue(tmpS);
 				if (systolic != null) {
 					tmpL = addToMeasurement(personId, (long) 3004249, measureDate, measureDateTime, 44818701, // 3004249 : BP systolic, 44818701: from physical examination
 							systolic, null, (long) 8876, null, visitOccurrenceId, "systolic_pressure", null, tmpS);  // 8876: millimeter mercury column
-					s2t.add(measureRow.get("patient_pressure_measure_id"), // srcInstance
+					s2t.add(measureRow.get("patient_pressure_measure_id").replaceAll("\u0000", ""), // srcInstance
 							"patient_pressure_measures",// srcTable
 							"systolic_pressure",	// srcCode
 							"", 					// srcName
@@ -692,12 +692,12 @@ public class ImasisETLtoV5 {
 							(long) 3004249);		// trgConceptId
 					numRecs++;
 				}
-				tmpS = measureRow.get("diastolic_pressure");
+				tmpS = measureRow.get("diastolic_pressure").replaceAll("\u0000", "");
 				Double diastolic = getNumValue(tmpS);
 				if (diastolic != null) {
 					tmpL = addToMeasurement(personId, (long) 3012888, measureDate, measureDateTime, 44818701, // 3012888: BP diastolic, 44818701: from physical examination
 							diastolic, null, (long) 8876, null, visitOccurrenceId, "diastolic_pressure", null, tmpS);  // 8876: millimeter mercury column
-					s2t.add(measureRow.get("patient_pressure_measure_id"),// srcInstance
+					s2t.add(measureRow.get("patient_pressure_measure_id").replaceAll("\u0000", ""),// srcInstance
 							"patient_pressure_measures",// srcTable
 							"diastolic_pressure",	// srcCode
 							tmpS, 					// srcName
@@ -718,26 +718,26 @@ public class ImasisETLtoV5 {
 
 	//********************************************************************************//
 	private long processVisitAndRelatedRecords(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 
 		for (Row visitRow : sourceConnection.query("select * from visit where patient_id = '" + patientId + "'")) {
-			String startDate = visitRow.get("start_date");
-			String endDate = visitRow.get("end_date");
+			String startDate = visitRow.get("start_date").replaceAll("\u0000", "");
+			String endDate = visitRow.get("end_date").replaceAll("\u0000", "");
 			if (StringUtilities.isDate(startDate)) {
 				etlReport.registerIncomingData("visit", visitRow);
 				Long refCareSiteId = null;
-				String hospital = visitRow.get("visit_hospital_id");
+				String hospital = visitRow.get("visit_hospital_id").replaceAll("\u0000", "");
 				if (hospital.length() > 0) {
 					refCareSiteId = sourceToCareSiteId.get(hospital);
 				}
 
 				Long refProviderId = visitRow.getLong("service_id");
 				long visitConceptId = 9202; // Outpatient visit
-				String tmpS = visitRow.get("visit_id");
+				String tmpS = visitRow.get("visit_id").replaceAll("\u0000", "");
 				if ((tmpS.length() > 0) && (StringUtilities.isNumber(tmpS))) {
 					Long visitid = getLongValue(tmpS);
-					String visittype = visitRow.get("visit_type_id");
+					String visittype = visitRow.get("visit_type_id").replaceAll("\u0000", "");
 					if (visittype.length() > 0) {
 						switch (visittype.toLowerCase()) {
 						case "1":  // Inpatient visit
@@ -768,7 +768,7 @@ public class ImasisETLtoV5 {
 
 	//********************************************************************************//
 	private long processDrugRecords(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 
 		// DRUGS 
@@ -779,27 +779,27 @@ public class ImasisETLtoV5 {
 		sqlQ += "and d.drug_id = da.drug_id;";
 		for (Row drugRow : sourceConnection.query(sqlQ)) {
 			etlReport.registerIncomingData("drug_administration", drugRow);
-			String drugAdministrationId = drugRow.get("drug_administration_id");
-			String drugId = drugRow.get("drug_id");
-			String administrationDay = drugRow.get("administration_day");
-			String administrationHour = drugRow.get("administration_hour");
+			String drugAdministrationId = drugRow.get("drug_administration_id").replaceAll("\u0000", "");
+			String drugId = drugRow.get("drug_id").replaceAll("\u0000", "");
+			String administrationDay = drugRow.get("administration_day").replaceAll("\u0000", "");
+			String administrationHour = drugRow.get("administration_hour").replaceAll("\u0000", "");
 			String administrationDayTime = administrationDay;
 			if ((administrationHour != null) && (administrationHour.length() > 7))
 				administrationDayTime += " " + administrationHour;
 
-			String tmpS = drugRow.get("dosage");
+			String tmpS = drugRow.get("dosage").replaceAll("\u0000", "");
 			Double dosage = getNumValue(tmpS);
 
-			String administrationCode = drugRow.get("administration_code").trim().toLowerCase();
+			String administrationCode = drugRow.get("administration_code").replaceAll("\u0000", "").trim().toLowerCase();
 			Long routeConceptId = null;
 			if (administrationCode.length() > 0) 
 				routeConceptId = adminCodeToConceptId.get(administrationCode);
 
-			tmpS = drugRow.get("national_code_cima_id");	
+			tmpS = drugRow.get("national_code_cima_id").replaceAll("\u0000", "");	
 			if ((tmpS.length() > 0) && (StringUtilities.isNumber(tmpS))) {
 				Long natCode = getLongValue(tmpS);
 				for (Row rxNormRow: sourceConnection.query("select rxnorm_code, rxnorm_str from natcode_to_rxnorm where national_code_cima_id=" + tmpS + " order by ttype_rxnorm limit 1")) {
-					for (Row targetConcept: targetConnection.query("select concept_id, concept_name from concept where vocabulary_id='RxNorm' and concept_code='" + rxNormRow.get("rxnorm_code")+"'")) {
+					for (Row targetConcept: targetConnection.query("select concept_id, concept_name from concept where vocabulary_id='RxNorm' and concept_code='" + rxNormRow.get("rxnorm_code").replaceAll("\u0000", "")+"'")) {
 						numRecs++;
 						Long conceptId = targetConcept.getLong("concept_id");
 
@@ -829,11 +829,11 @@ public class ImasisETLtoV5 {
 						s2t.add(drugAdministrationId, 	// srcInstance
 								"drug_administration",	// srcTable
 								Long.toString(natCode),// srcCode
-								rxNormRow.get("rxnorm_str"), // srcName
+								rxNormRow.get("rxnorm_str").replaceAll("\u0000", ""), // srcName
 								"", 					// srcVocabulary
 								null, 					// srcConceptId
 								"drug_exposure",		// trgTable
-								rxNormRow.get("rxnorm_code"),	// trgCode
+								rxNormRow.get("rxnorm_code").replaceAll("\u0000", ""),	// trgCode
 								targetConcept.get("concept_name"),// trgName
 								"Drug",					// trgDomain
 								"RxNorm", 				// trgVocabulary
@@ -875,15 +875,27 @@ public class ImasisETLtoV5 {
 		}
 		return vocabVersion;
 	}
+	
+//	Long refProviderId = serviceToProviderId.get(annotationRow.getLong("service_id"));
+	
+	//********************************************************************************//
+	private Long lookupServiceToProviderId(String refStr) {
+		Long retProviderId = null;
+		if ((refStr != null) && StringUtilities.isNumber(refStr)) {
+			retProviderId = serviceToProviderId.get(getLongValue(refStr));
+		}
+		return retProviderId;
+	}
+	
 	//********************************************************************************//
 	private long processVisitPeriodRecords(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 		for (Row periodRow : sourceConnection.query("select * from visit_period where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_period", periodRow);
 			Long visitPeriodId = periodRow.getLong("visit_period_id");
-			String startDate = periodRow.get("start_date");
-			String endDate = periodRow.get("end_date");
+			String startDate = periodRow.get("start_date").replaceAll("\u0000", "");
+			String endDate = periodRow.get("end_date").replaceAll("\u0000", "");
 			if (StringUtilities.isDate(startDate)){
 				Row observationPeriod = new Row();
 				observationPeriod.add("observation_period_id", visitPeriodId);
@@ -907,22 +919,22 @@ public class ImasisETLtoV5 {
 	}
 	//********************************************************************************//
 	private long processVisitAnnotationsRecords(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 		for (Row annotationRow : sourceConnection.query("select * from visit_annotations where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_annotations", annotationRow);
-			Long refProviderId = serviceToProviderId.get(annotationRow.getLong("service_id"));
-			String tmpS = annotationRow.get("visit_annotations_id");
+			Long refProviderId = lookupServiceToProviderId(annotationRow.get("service_id").replaceAll("\u0000", ""));
+			String tmpS = annotationRow.get("visit_annotations_id").replaceAll("\u0000", "");
 			Long visitAnnotationsId = null;
 			if ((tmpS != null) && StringUtilities.isNumber(tmpS)) {
 				visitAnnotationsId = getLongValue(tmpS);
-				String noteText = annotationRow.get("annotation");
-				String annotationDate = annotationRow.get("annotation_date");
-				String annotationTime = annotationRow.get("annotation_hour");
+				String noteText = annotationRow.get("annotation").replaceAll("\u0000", "");
+				String annotationDate = annotationRow.get("annotation_date").replaceAll("\u0000", "");
+				String annotationTime = annotationRow.get("annotation_hour").replaceAll("\u0000", "");
 				String annotationDateTime = annotationDate;
 				if ((annotationTime != null) && (annotationTime.length()>7))
 					annotationDateTime += " " + annotationTime;
-				tmpS = annotationRow.get("visit_period_id");
+				tmpS = annotationRow.get("visit_period_id").replaceAll("\u0000", "");
 				Long visitId = getLongValue(tmpS);
 				if (StringUtilities.isDate(annotationDate)) {
 					Row note = new Row();
@@ -949,7 +961,7 @@ public class ImasisETLtoV5 {
 
 	//********************************************************************************//
 	private long processDiagnosis(Row row) {
-		String patientId = row.get("patient_id");
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
 		long numRecs = 0;
 		String qry = "select d.diagnosis_id, d.visit_id, d.patient_id, dt.diagnosis_type, d.diagnosis_date, ";
 		qry += "d.icd9cm_code_id from diagnosis d \n";
@@ -957,11 +969,11 @@ public class ImasisETLtoV5 {
 		qry += "where d.patient_id = " + patientId;
 		for (Row diagnosisRow : sourceConnection.query(qry)) {
 			etlReport.registerIncomingData("diagnosis", diagnosisRow);
-			String diagnosisId = diagnosisRow.get("diagnosis_id");
-			String code = diagnosisRow.get("icd9cm_code_id");
-			String diagtype = diagnosisRow.get("diagnosis_type");
-			String diagDate = diagnosisRow.get("diagnosis_date");
-			String tmpS = diagnosisRow.get("visit_id");
+			String diagnosisId = diagnosisRow.get("diagnosis_id").replaceAll("\u0000", "");
+			String code = diagnosisRow.get("icd9cm_code_id").replaceAll("\u0000", "");
+			String diagtype = diagnosisRow.get("diagnosis_type").replaceAll("\u0000", "");
+			String diagDate = diagnosisRow.get("diagnosis_date").replaceAll("\u0000", "");
+			String tmpS = diagnosisRow.get("visit_id").replaceAll("\u0000", "");
 			Long visitId = getLongValue(tmpS);
 			CodeDomainData data = icd9ToConcept.getCodeData(code);
 			for (TargetConcept targetConcept : data.targetConcepts) {
@@ -1101,7 +1113,7 @@ public class ImasisETLtoV5 {
 	
 	//********************************************************************************//
 		private long processProcedures(Row row) {
-			String patientId = row.get("patient_id");
+			String patientId = row.get("patient_id").replaceAll("\u0000", "");
 			long numRecs = 0;
 			String qry = "select p.procedures_id, p.patient_id, p.visit_id, p.procedure_code, pt.procedure_type, v.end_date, v.service_id from procedures p\n";
 			qry += "left join visit v on p.visit_id=v.visit_id\n";
@@ -1110,13 +1122,14 @@ public class ImasisETLtoV5 {
 			for (Row procedureRow : sourceConnection.query(qry)) {
 				etlReport.registerIncomingData("procedures", procedureRow);
 				long procOccurId = procedureRow.getLong("procedures_id");
-				String code = procedureRow.get("procedure_code");
-				String proctype = procedureRow.get("procedure_type");
-				String tmpS = procedureRow.get("visit_id");
+				String code = procedureRow.get("procedure_code").replaceAll("\u0000", "");
+				String proctype = procedureRow.get("procedure_type").replaceAll("\u0000", "");
+				String tmpS = procedureRow.get("visit_id").replaceAll("\u0000", "");
 				Long visitId = getLongValue(tmpS);
-				String endDate = procedureRow.get("end_date");
-				tmpS = procedureRow.get("service_id");
-				Long refProviderId = serviceToProviderId.get(tmpS);
+				String endDate = procedureRow.get("end_date").replaceAll("\u0000", "");
+				tmpS = procedureRow.get("service_id").replaceAll("\u0000", "");
+				Long refProviderId = lookupServiceToProviderId(tmpS);
+
 				CodeDomainData data = icd9ProcToConcept.getCodeData(code);
 				for (TargetConcept targetConcept : data.targetConcepts) {
 					String targetDomain = targetConcept.domainId;
@@ -1163,7 +1176,7 @@ public class ImasisETLtoV5 {
 
 		//********************************************************************************//
 		private long processLaboratory(Row row) {
-			String patientId = row.get("patient_id");
+			String patientId = row.get("patient_id").replaceAll("\u0000", "");
 			long numRecs = 0;
 
 			String sqlQ = "select l.laboratory_id, l.lab_test_name_id, l.lab_result_name_id, l.request_date, ";
@@ -1176,19 +1189,19 @@ public class ImasisETLtoV5 {
 			sqlQ += "and l.patient_id=" + patientId +";";
 			for (Row laboratoryRow : sourceConnection.query(sqlQ)) {
 				etlReport.registerIncomingData("laboratory", laboratoryRow);
-				String laboratoryId = laboratoryRow.get("laboratory_id");
-				String labTestNameId = laboratoryRow.get("lab_test_name_id").trim();
-				String labResultNameId = laboratoryRow.get("lab_result_name_id").trim();
-				String requestDate = laboratoryRow.get("request_date").trim();
-				String tmpS = laboratoryRow.get("visit_period_id");
+				String laboratoryId = laboratoryRow.get("laboratory_id").replaceAll("\u0000", "");
+				String labTestNameId = laboratoryRow.get("lab_test_name_id").replaceAll("\u0000", "").trim();
+				String labResultNameId = laboratoryRow.get("lab_result_name_id").replaceAll("\u0000", "").trim();
+				String requestDate = laboratoryRow.get("request_date").replaceAll("\u0000", "").trim();
+				String tmpS = laboratoryRow.get("visit_period_id").replaceAll("\u0000", "");
 				Long visitId = getLongValue(tmpS);
 
-				String nameUnime = laboratoryRow.get("lab_measure_unit_SI_id").trim();
+				String nameUnime = laboratoryRow.get("lab_measure_unit_SI_id").replaceAll("\u0000", "").trim();
 				Long unitConceptId = null;
 				if (nameUnime.length() > 0)
 					unitConceptId = labmeasureunitToConceptId.get(nameUnime.toLowerCase());
 
-				String result = replaceSpecialChars(laboratoryRow.get("result").trim());
+				String result = replaceSpecialChars(laboratoryRow.get("result").replaceAll("\u0000", "").trim());
 				Double resultVal = null;
 				String resultStr = null;
 				Long resultConceptId = null;
@@ -1225,7 +1238,7 @@ public class ImasisETLtoV5 {
 					}
 				}
 				
-				String loincId = laboratoryRow.get("loinc_id").trim();
+				String loincId = laboratoryRow.get("loinc_id").replaceAll("\u0000", "").trim();
 				if ((loincId != null) && (loincId.length() > 0)) {
 					CodeDomainData data = loincToConcept.getCodeData(loincId);
 					for (TargetConcept targetConcept : data.targetConcepts) {
@@ -1316,9 +1329,9 @@ public class ImasisETLtoV5 {
 		
 		//********************************************************************************//
 	private void processServiceRecords() {
-		for (Row serviceRow : sourceConnection.query("select * from services")) {
+		for (Row serviceRow : sourceConnection.query("select * from services where service_id is not null")) {
 			Long serviceId = serviceRow.getLong("service_id");
-			String description = serviceRow.get("description");
+			String description = serviceRow.get("description").replaceAll("\u0000", "");
 			Long refProviderId = serviceToProviderId.get(serviceId);
 			if (refProviderId == null) {
 				etlReport.registerIncomingData("services", serviceRow);
@@ -1354,8 +1367,8 @@ public class ImasisETLtoV5 {
 
 		for (Row geoRow : sourceConnection.query("select * from geographical_name")) {
 			etlReport.registerIncomingData("geographical_name", geoRow);
-			String geoNameId = geoRow.get("geographical_name_id").trim();
-			String name = geoRow.get("name").trim();
+			String geoNameId = geoRow.get("geographical_name_id").replaceAll("\u0000", "").trim();
+			String name = geoRow.get("name").replaceAll("\u0000", "").trim();
 			if (geographicalNameToProviderId.get(name) == null) {
 				if ((geoNameId.length() > 0) && (StringUtilities.isNumber(geoNameId))) {
 					locationId = getLongValue(geoNameId);
@@ -1383,8 +1396,8 @@ public class ImasisETLtoV5 {
 
 		for (Row hospRow : sourceConnection.query("select * from visit_hospital")) {
 			etlReport.registerIncomingData("hospital", hospRow);
-			String visitHospId = hospRow.get("visit_hospital_id").trim();
-			String name = hospRow.get("visit_hospital_label").trim();
+			String visitHospId = hospRow.get("visit_hospital_id").replaceAll("\u0000", "").trim();
+			String name = hospRow.get("visit_hospital_label").replaceAll("\u0000", "").trim();
 			if (sourceToCareSiteId.get(name) == null ) {
 				if ((visitHospId.length() > 0) && (StringUtilities.isNumber(visitHospId))) {
 					careSiteId = getLongValue(visitHospId);
