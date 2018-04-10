@@ -934,6 +934,7 @@ public class SwitchboxETLtoV5 {
 					}
 
 					tmpS = getRowValue(row, "DIAGNOSIS");   // 0= geen diagnose, 1=SCI, 2=MCI, 3=dement
+					diagnosisCode = null;
 					switch (site) {
 					case MAASTRICHT:
 						switch (tmpS) {
@@ -947,7 +948,15 @@ public class SwitchboxETLtoV5 {
 							if (getLongRowValue(row, "AD_FLAG") == 1)
 								diagnosisCode = "ad";
 							else
-								diagnosisCode = null;
+								if (getLongRowValue(row, "VAD_FLAG") == 1)
+									diagnosisCode = "vad";
+								else {
+									Long tmpCode = getLongRowValue(row, "OTHERDEM_FLAG");
+									if (tmpCode == 1) // FTD
+										diagnosisCode = "ftd";
+									else if (tmpCode == 2) // LBD
+										diagnosisCode = "lbd";
+								}
 							break;
 						default:
 							diagnosisCode = null;

@@ -9,10 +9,12 @@ delirium,2000000469
 depression,2000000470
 diabetes_mellitus,2000000353
 dotter_stent,2000000367
+ftd,4043378
 hypertension,2000000383
 hyperthyroidism,2000000384
 hypothyroidism,2000000385
 kidney,2000000432
+lbd,4196433
 liver,2000000434
 mci,2000000254
 myocardial_infarction,2000000390
@@ -23,3 +25,4 @@ other_psychiatric,2000000410
 other_somatic,2000000412
 sci,2000000256
 tia,2000000441
+vad,443605
