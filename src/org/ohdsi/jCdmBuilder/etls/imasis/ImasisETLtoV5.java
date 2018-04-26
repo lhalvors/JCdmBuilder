@@ -57,6 +57,7 @@ public class ImasisETLtoV5 {
 	private static long					MINIMUM_FREE_MEMORY_DEFAULT		= 10000000;
 	public static boolean				GENERATE_QASAMPLES_DEFAULT		= false;
 	public static double				QA_SAMPLE_PROBABILITY_DEFAULT	= 0.0001;
+	public static boolean				ENFORCE_OBS_PERIOD_DEFAULT		= true;
 	public static String[]				tablesInsideOP					= new String[] { "condition_occurrence", "procedure_occurrence", 
 			"drug_exposure", "death", "visit_occurrence", "observation", "measurement"					};
 	public static String[]				fieldInTables					= new String[] { "condition_start_date", "procedure_date", 
@@ -101,7 +102,8 @@ public class ImasisETLtoV5 {
 	private long						memoryLogFile; 				// 0: No, 1: every time a batch is inserted in target, 2: for every patient record
 	public Boolean						generateQaSamples = false;	// Generate QA Samples at end of ETL
 	public double						qaSampleProbability;		// The sample probability value used to include a patient's records in the QA Sample export
-
+	public Boolean						enforceObservationPeriods = true;	// Remove records that fall outside observation_period definitions
+	
 	private String						memFilename;
 	private WriteTextFile 				memOut;
 	private String						logFilename;
@@ -196,7 +198,7 @@ public class ImasisETLtoV5 {
 		if (generateQaSamples)
 			qcSampleConstructor.addCdmData(targetConnection, targetDbSettings.database);
 
-		String etlReportName = etlReport.generateETLReport(icd9ToConcept, icd9ProcToConcept, loincToConcept); //, atcToConcept);
+		String etlReportName = etlReport.generateETLReport(icd9ToConcept, icd9ProcToConcept, loincToConcept, natCodeCimaIdToConcept); //, atcToConcept);
 		StringUtilities.outputWithTime("An ETL report was generated and written to :" + etlReportName);
 		if (etlReport.getTotalProblemCount() > 0) {
 			String etlProblemListname = etlReport.generateProblemReport();
@@ -313,7 +315,8 @@ public class ImasisETLtoV5 {
 	//********************  ********************//
 	private void insertBatch() {
 		removeRowsWithNonNullableNulls();
-		removeRowsOutsideOfObservationTime();
+		if (enforceObservationPeriods)
+			removeRowsOutsideOfObservationTime();
 
 		etlReport.registerOutgoingData(tableToRows);
 		for (String table : tableToRows.keySet())
@@ -412,12 +415,13 @@ public class ImasisETLtoV5 {
 
 	//********************  ********************//
 	private void loadSettings() {
-		batchSize = BATCH_SIZE_DEFAULT; 					// How many patient records, and all related records, should be loaded before inserting batch in target (default: 1000)
-		minimumFreeMemory = MINIMUM_FREE_MEMORY_DEFAULT;	// Monitor memory usage - if free memory falls below threshold, insert batch of records already loaded (default: 10000000)
-		generateQaSamples = GENERATE_QASAMPLES_DEFAULT;		// Generate QA Samples at end of ETL (default: False)
-		qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;// The sample probability value used to include a patient's records in the QA Sample export (default: 0.0001)
-		memoryLogFile = 0;									// 0: No, 1: every time a batch is inserted in target, 2: for every patient record (default: 0)
-
+		batchSize = BATCH_SIZE_DEFAULT; 						// How many patient records, and all related records, should be loaded before inserting batch in target (default: 1000)
+		minimumFreeMemory = MINIMUM_FREE_MEMORY_DEFAULT;		// Monitor memory usage - if free memory falls below threshold, insert batch of records already loaded (default: 10000000)
+		generateQaSamples = GENERATE_QASAMPLES_DEFAULT;			// Generate QA Samples at end of ETL (default: false)
+		qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;	// The sample probability value used to include a patient's records in the QA Sample export (default: 0.0001)
+		memoryLogFile = 0;										// 0: No, 1: every time a batch is inserted in target, 2: for every patient record (default: 0)
+		enforceObservationPeriods = ENFORCE_OBS_PERIOD_DEFAULT;	// Remove records that fall outside observation_period definitions (default: true)
+		
 		File f = new File("imasis.ini");
 		if(f.exists() && !f.isDirectory()) { 
 			try {
@@ -470,6 +474,18 @@ public class ImasisETLtoV5 {
 						qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;
 				} catch (Exception e) {
 					qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;
+				}
+
+				try {
+					Long numParam = Long.valueOf(settings.get("enforceObservationPeriods"));
+					if (numParam != null) {
+						if (numParam == 1)
+							enforceObservationPeriods = true;
+						else
+							enforceObservationPeriods = false;
+					}
+				} catch (Exception e) {
+					enforceObservationPeriods = ENFORCE_OBS_PERIOD_DEFAULT;
 				}
 
 				String hello = settings.get("hello");
