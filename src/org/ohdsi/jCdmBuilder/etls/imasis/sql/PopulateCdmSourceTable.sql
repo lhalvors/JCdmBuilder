@@ -11,8 +11,8 @@ insert into cdm_source (
 	vocabulary_version
 	)
 values (
-	'l’institut d’assistència sanitària',
-	'imasis',
+	'L’Institut d’Assistència Sanitària',
+	'IMASIS',
 	'',
 	'',
 	'',

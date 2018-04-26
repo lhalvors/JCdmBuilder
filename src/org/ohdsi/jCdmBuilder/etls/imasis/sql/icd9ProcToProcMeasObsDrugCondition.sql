@@ -11,7 +11,7 @@ inner join concept_relationship
 	on icd9.concept_id = concept_id_1
 inner join concept standard
 	on standard.concept_id = concept_id_2
-where icd9.vocabulary_id = 'icd9proc'
-	and standard.standard_concept = 's'
-	and relationship_id = 'maps to'
+where icd9.vocabulary_id = 'ICD9Proc'
+	and standard.standard_concept = 'S'
+	and relationship_id = 'Maps to'
 	and (concept_relationship.invalid_reason is null or concept_relationship.invalid_reason = '')

@@ -81,6 +81,7 @@ public class ImasisETLtoV5 {
 	private CodeToDomainConceptMap		icd9ToConcept;
 	private CodeToDomainConceptMap		icd9ProcToConcept;
 	private CodeToDomainConceptMap		loincToConcept;
+	private CodeToDomainConceptMap		natCodeCimaIdToConcept;
 	private Map<String, Long>			adminCodeToConceptId			= new HashMap<String, Long>();
 	private Map<String, Long>			resultcodeToConceptId			= new HashMap<String, Long>();
 	private Map<String, Long>			labmeasureunitToConceptId		= new HashMap<String, Long>();
@@ -89,6 +90,7 @@ public class ImasisETLtoV5 {
 	private Map<String, Long>			diagnosisCodeToConceptId		= new HashMap<String, Long>();
 	private Map<String, Long>			procedureCodeToConceptId		= new HashMap<String, Long>();
 	private Map<Long, Long>				serviceToProviderId				= new HashMap<Long, Long>();
+	private Map<String, String>			resTestToLoincCode				= new HashMap<String, String>();
 	private QCSampleConstructor			qcSampleConstructor;
 	private EtlReport					etlReport;
 	private CdmV5NullableChecker		cdmv5NullableChecker			= new CdmV5NullableChecker();
@@ -130,8 +132,8 @@ public class ImasisETLtoV5 {
 		geographicalNameToProviderId.clear();
 		diagnosisCodeToConceptId.clear();
 		procedureCodeToConceptId.clear();
+		resTestToLoincCode.clear();
 
-		loadMappings(targetDbSettings);
 		loadSettings();
 
 		sourceConnection = new RichConnection(sourceDbSettings.server, sourceDbSettings.domain, sourceDbSettings.user, sourceDbSettings.password,
@@ -143,6 +145,8 @@ public class ImasisETLtoV5 {
 				targetDbSettings.dbType);
 		targetConnection.setContext(this.getClass());
 		targetConnection.use(targetDbSettings.database);
+
+		loadMappings();
 
 		truncateTables(targetConnection);
 		this.folder = folder;
@@ -186,6 +190,8 @@ public class ImasisETLtoV5 {
 		s2t.finalize();
 
 		StringUtilities.outputWithTime("Processed " + personCount + " persons");
+
+		StringUtilities.outputWithTime("A source-to-target report was generated and written to :" + s2t.getTrackFile());
 
 		if (generateQaSamples)
 			qcSampleConstructor.addCdmData(targetConnection, targetDbSettings.database);
@@ -319,11 +325,8 @@ public class ImasisETLtoV5 {
 	}
 
 	//********************  ********************//
-	private void loadMappings(DbSettings dbSettings) {
+	private void loadMappings() {
 		StringUtilities.outputWithTime("Loading mappings from server");
-		RichConnection targetConnection = new RichConnection(dbSettings.server, dbSettings.domain, dbSettings.user, dbSettings.password, dbSettings.dbType);
-		targetConnection.setContext(this.getClass());
-		targetConnection.use(dbSettings.database);
 
 		System.out.println("- Loading ICD-9 to concept_id mapping");
 		icd9ToConcept = new CodeToDomainConceptMap("ICD-9 to concept_id mapping", "Condition");
@@ -340,7 +343,13 @@ public class ImasisETLtoV5 {
 			icd9ProcToConcept.add(row.get("SOURCE_CODE"), row.get("SOURCE_NAME"), row.getInt("SOURCE_CONCEPT_ID"), row.getInt("TARGET_CONCEPT_ID"),
 					row.get("TARGET_CODE"), row.get("TARGET_NAME"), row.get("DOMAIN_ID"));
 		}
-		
+
+		System.out.println("- Loading LAB_RESULT_NAME + LAB_TEST_NUMBER to LOINC code mapping");
+		for (Row row : sourceConnection.queryResource("sql/selectLoincCodesFromLabMap.sql")) {
+			row.upperCaseFieldNames();
+			resTestToLoincCode.put(row.get("RES_TEST_NAME").replaceAll("\u0000", "").trim(), row.get("LOINC_ID").replaceAll("\u0000", "").trim());
+		}
+
 		System.out.println("- Loading LOINC to concept_id mapping");
 		loincToConcept = new CodeToDomainConceptMap("LOINC to concept_id mapping", "Measurement");
 		for (Row row : targetConnection.queryResource("sql/loincToMeasurementObservation.sql")) {
@@ -348,7 +357,7 @@ public class ImasisETLtoV5 {
 			loincToConcept.add(row.get("SOURCE_CODE"), row.get("SOURCE_NAME"), row.getInt("SOURCE_CONCEPT_ID"), row.getInt("TARGET_CONCEPT_ID"),
 					row.get("TARGET_CODE"), row.get("TARGET_NAME"), row.get("DOMAIN_ID"));
 		}
-		
+
 		System.out.println("- Loading ADMINISTRATIONCODE to concept_id mapping");
 		for (Row row : new ReadCSVFileWithHeader(this.getClass().getResourceAsStream("csv/administrationcode.csv"))) {
 			row.upperCaseFieldNames();
@@ -378,7 +387,26 @@ public class ImasisETLtoV5 {
 			row.upperCaseFieldNames();
 			procedureCodeToConceptId.put(row.get("PROCEDURE_TYPE").toLowerCase(), row.getLong("CONCEPT_ID"));
 		}
-		
+
+		System.out.println("- Loading NATIONAL_CODE_CIMA_ID code mapping");
+		natCodeCimaIdToConcept = new CodeToDomainConceptMap("NATIONAL_CODE_CIMA_ID to concept_id mapping", "Drug");
+		for (Row row : sourceConnection.queryResource("sql/selectDistinctCodesFromNatcodeToRxnorm.sql")) {
+			row.upperCaseFieldNames();
+			String natCodeStr = row.get("NATIONAL_CODE_CIMA_ID").replaceAll("\u0000", "");
+			for (Row targetConcept: targetConnection.query("select concept_id, concept_code, concept_name, domain_id from concept where vocabulary_id='RxNorm' and concept_code='" + row.get("RXNORM_CODE").replaceAll("\u0000", "")+"'")) {
+				targetConcept.upperCaseFieldNames();
+				Long conceptId = targetConcept.getLong("CONCEPT_ID");
+				String srcName = row.get("RXNORM_STR").replaceAll("\u0000", "");
+				Integer srcConcept = 0; //getIntValue(natCodeStr);
+				Integer trgConceptId = targetConcept.getInt("CONCEPT_ID");
+				String trgConceptCode = targetConcept.get("CONCEPT_CODE");
+				String trgConceptName = targetConcept.get("CONCEPT_NAME"); 
+				String trgDomain = targetConcept.get("DOMAIN_ID");
+				natCodeCimaIdToConcept.add(natCodeStr, srcName, srcConcept, trgConceptId, trgConceptCode, trgConceptName, trgDomain);
+				break;				
+			}
+		}
+
 		StringUtilities.outputWithTime("Finished loading mappings");
 	}
 
@@ -389,12 +417,12 @@ public class ImasisETLtoV5 {
 		generateQaSamples = GENERATE_QASAMPLES_DEFAULT;		// Generate QA Samples at end of ETL (default: False)
 		qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;// The sample probability value used to include a patient's records in the QA Sample export (default: 0.0001)
 		memoryLogFile = 0;									// 0: No, 1: every time a batch is inserted in target, 2: for every patient record (default: 0)
-		
+
 		File f = new File("imasis.ini");
 		if(f.exists() && !f.isDirectory()) { 
 			try {
 				settings = new IniFile("imasis.ini");
-				
+
 				try {
 					Long numParam = Long.valueOf(settings.get("memoryThreshold"));
 					if (numParam != null)
@@ -447,7 +475,7 @@ public class ImasisETLtoV5 {
 				String hello = settings.get("hello");
 				if (hello != null)
 					StringUtilities.outputWithTime(hello);
-				
+
 			} catch (Exception e) {
 				StringUtilities.outputWithTime("No .ini file found");
 			}
@@ -460,6 +488,13 @@ public class ImasisETLtoV5 {
 			return null;
 		else
 			return Long.valueOf(val);
+	}
+	//********************  ********************//
+	private Integer getIntValue(String val) {
+		if ((val == null) || (val.equals("") || !StringUtilities.isNumber(val)))
+			return null;
+		else
+			return Integer.valueOf(val);
 	}
 	//********************  ********************//
 	private Double getNumValue(String val) {
@@ -657,7 +692,7 @@ public class ImasisETLtoV5 {
 		}
 		return numRecs;
 	}
-	
+
 	//********************************************************************************//
 	private long processPatientPressureMeasures(Row row) {
 		String patientId = row.get("patient_id").replaceAll("\u0000", "");
@@ -700,7 +735,7 @@ public class ImasisETLtoV5 {
 					s2t.add(measureRow.get("patient_pressure_measure_id").replaceAll("\u0000", ""),// srcInstance
 							"patient_pressure_measures",// srcTable
 							"diastolic_pressure",	// srcCode
-							tmpS, 					// srcName
+							"", 					// srcName
 							"", 					// srcVocabulary
 							null, 					// srcConceptId
 							"measurement",			// trgTable
@@ -798,48 +833,58 @@ public class ImasisETLtoV5 {
 			tmpS = drugRow.get("national_code_cima_id").replaceAll("\u0000", "");	
 			if ((tmpS.length() > 0) && (StringUtilities.isNumber(tmpS))) {
 				Long natCode = getLongValue(tmpS);
-				for (Row rxNormRow: sourceConnection.query("select rxnorm_code, rxnorm_str from natcode_to_rxnorm where national_code_cima_id=" + tmpS + " order by ttype_rxnorm limit 1")) {
-					for (Row targetConcept: targetConnection.query("select concept_id, concept_name from concept where vocabulary_id='RxNorm' and concept_code='" + rxNormRow.get("rxnorm_code").replaceAll("\u0000", "")+"'")) {
-						numRecs++;
-						Long conceptId = targetConcept.getLong("concept_id");
-
-						addToDrugExposure(
-								getLongValue(drugAdministrationId),	// drug_exposure_id
-								personId,							// person_id
-								conceptId,							// drug_concept_id
-								administrationDay,					// drug_exposure_start_date
-								administrationDayTime,				// drug_exposure_start_datetime
-								administrationDay,					// drug_exposure_end_date
-								administrationDayTime,				// drug_exposure_end_datetime
-								null, 								// verbatim_end_date
-								(long) 38000180, 					// drug_type_concept_id, 38000180: Inpatient administration
-								null,								// stop_reason
-								null,								// refills
-								dosage,								// quantity
-								null,								// days_supply
-								null,								// sig
-								routeConceptId,						// route_concept_id
-								null,								// lot_number
-								null,								// provider_id
-								null,								// visit_occurrence_id
-								Long.toString(natCode),				// drug_source_value
-								null,								// drug_source_concept_id
-								administrationCode,					// route_source_value
-								null);								// dose_unit_source_value
-						s2t.add(drugAdministrationId, 	// srcInstance
-								"drug_administration",	// srcTable
-								Long.toString(natCode),// srcCode
-								rxNormRow.get("rxnorm_str").replaceAll("\u0000", ""), // srcName
-								"", 					// srcVocabulary
-								null, 					// srcConceptId
-								"drug_exposure",		// trgTable
-								rxNormRow.get("rxnorm_code").replaceAll("\u0000", ""),	// trgCode
-								targetConcept.get("concept_name"),// trgName
-								"Drug",					// trgDomain
-								"RxNorm", 				// trgVocabulary
-								conceptId);				// trgConceptId
-					}
+				CodeDomainData srcData = natCodeCimaIdToConcept.getCodeData(tmpS);
+				for (TargetConcept targetConcept : srcData.targetConcepts) {
+					numRecs++;
+					addToDrugExposure(
+							getLongValue(drugAdministrationId),	// drug_exposure_id
+							personId,							// person_id
+							targetConcept.conceptId,			// drug_concept_id
+							administrationDay,					// drug_exposure_start_date
+							administrationDayTime,				// drug_exposure_start_datetime
+							administrationDay,					// drug_exposure_end_date
+							administrationDayTime,				// drug_exposure_end_datetime
+							null, 								// verbatim_end_date
+							(long) 38000180, 					// drug_type_concept_id, 38000180: Inpatient administration
+							null,								// stop_reason
+							null,								// refills
+							dosage,								// quantity
+							null,								// days_supply
+							null,								// sig
+							routeConceptId,						// route_concept_id
+							null,								// lot_number
+							null,								// provider_id
+							null,								// visit_occurrence_id
+							Long.toString(natCode),				// drug_source_value
+							null,								// drug_source_concept_id
+							administrationCode,					// route_source_value
+							null);								// dose_unit_source_value
+					s2t.add(drugAdministrationId, 				// srcInstance
+							"drug_administration",				// srcTable
+							Long.toString(natCode), 			// srcCode
+							srcData.sourceConceptName,			// srcName
+							"", 								// srcVocabulary
+							null, 								// srcConceptId
+							"drug_exposure",					// trgTable
+							targetConcept.conceptCode,			// trgCode
+							targetConcept.conceptName,			// trgName
+							"Drug",								// trgDomain
+							"RxNorm", 							// trgVocabulary
+							(long) targetConcept.conceptId);	// trgConceptId
 				}
+			} else {  // no national_code_cima_id provided
+				s2t.add(drugAdministrationId, 	// srcInstance
+						"drug_administration",	// srcTable
+						null, 					// srcCode
+						"n/a",					// srcName
+						"", 					// srcVocabulary
+						null, 					// srcConceptId
+						"drug_exposure",		// trgTable
+						"n/a",					// trgCode
+						"n/a",					// trgName
+						"n/a",					// trgDomain
+						"n/a", 					// trgVocabulary
+						null);					// trgConceptId
 			}
 		}
 
@@ -865,7 +910,7 @@ public class ImasisETLtoV5 {
 
 		return procTypeConceptId;
 	}
-	
+
 	//********************************************************************************//
 	private String getVocabularyVersion() {
 		String vocabVersion = "";
@@ -875,9 +920,7 @@ public class ImasisETLtoV5 {
 		}
 		return vocabVersion;
 	}
-	
-//	Long refProviderId = serviceToProviderId.get(annotationRow.getLong("service_id"));
-	
+
 	//********************************************************************************//
 	private Long lookupServiceToProviderId(String refStr) {
 		Long retProviderId = null;
@@ -886,7 +929,7 @@ public class ImasisETLtoV5 {
 		}
 		return retProviderId;
 	}
-	
+
 	//********************************************************************************//
 	private long processVisitPeriodRecords(Row row) {
 		String patientId = row.get("patient_id").replaceAll("\u0000", "");
@@ -912,8 +955,8 @@ public class ImasisETLtoV5 {
 				}
 				observationPeriod.add("period_type_concept_id", 44814724); // Period covering healthcare encounters
 				tableToRows.put("observation_period", observationPeriod);
+				numRecs++;
 			}
-			numRecs++;
 		}
 		return numRecs;
 	}
@@ -976,161 +1019,189 @@ public class ImasisETLtoV5 {
 			String tmpS = diagnosisRow.get("visit_id").replaceAll("\u0000", "");
 			Long visitId = getLongValue(tmpS);
 			CodeDomainData data = icd9ToConcept.getCodeData(code);
-			for (TargetConcept targetConcept : data.targetConcepts) {
-				long tmpId = 0;
-				String targetDomain = targetConcept.domainId;
-				switch (targetDomain) {
-				case "Condition":
-					tmpId = addToConditionOccurrence(
-							personId,						// person_id
-							(long) targetConcept.conceptId,	// condition_concept_id
-							diagDate,						// condition_start_date
-							null, 							// condition_end_date
-							getConditionTypeConceptId(diagtype),// condition_type_concept_id
-							null,							// stop_reason
-							null,							// provider_id
-							visitId,						// coVisit_occurrence_id
-							code,							// condition_source_value
-							(long) data.sourceConceptId);	// condition_source_concept_id
-					s2t.add(diagnosisId, 					// srcInstance
-							"diagnosis",					// srcTable
-							code,							// srcCode
-							data.sourceConceptName,			// srcName
-							"ICD9CM", 						// srcVocabulary
-							(long) data.sourceConceptId,	// srcConceptId
-							"condition",					// trgTable
-							targetConcept.conceptCode,		// trgCode
-							targetConcept.conceptName,		// trgName
-							targetDomain,					// trgDomain
-							"SNOMED", 						// trgVocabulary
-							(long) targetConcept.conceptId);// trgConceptId
+			if (data != null) {
+				for (TargetConcept targetConcept : data.targetConcepts) {
+					long tmpId = 0;
+					String targetDomain = targetConcept.domainId;
+					switch (targetDomain) {
+					case "Condition":
+						tmpId = addToConditionOccurrence(
+								personId,						// person_id
+								(long) targetConcept.conceptId,	// condition_concept_id
+								diagDate,						// condition_start_date
+								null, 							// condition_end_date
+								getConditionTypeConceptId(diagtype),// condition_type_concept_id
+								null,							// stop_reason
+								null,							// provider_id
+								visitId,						// coVisit_occurrence_id
+								code,							// condition_source_value
+								(long) data.sourceConceptId);	// condition_source_concept_id
+						s2t.add(diagnosisId, 					// srcInstance
+								"diagnosis",					// srcTable
+								code,							// srcCode
+								data.sourceConceptName,			// srcName
+								"ICD9CM", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"condition",					// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								targetDomain,					// trgDomain
+								"SNOMED", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
 
-					break;
+						break;
 
-				case "Measurement":
-					tmpId = addToMeasurement(
-							personId,						// person_id
-							(long) targetConcept.conceptId,	// measurement_concept_id
-							diagDate,						// measurement_date
-							diagDate,						// measurement_datetime
-							(long) 44818702, 				// measurement_type_concept_id, 44818702: Lab result
-							null,							// operator_concept_id
-							null,							// value_as_number
-							null,							// value_as_conceptId
-							null,							// unit_concept_id
-							null,							// range_low
-							null, 							// range_high
-							null, 							// provider_id
-							visitId, 						// visit_occurrence_id
-							code, 							// measurement_source_value
-							(long) data.sourceConceptId,	// measurement_source_concept_id
-							null,							// unit_source_value
-							null);							// value_source_value
-					s2t.add(diagnosisId, 					// srcInstance
-							"diagnosis",					// srcTable
-							code,							// srcCode
-							data.sourceConceptName,			// srcName
-							"ICD9CM", 						// srcVocabulary
-							(long) data.sourceConceptId,	// srcConceptId
-							"measurement",					// trgTable
-							targetConcept.conceptCode,		// trgCode
-							targetConcept.conceptName,		// trgName
-							targetDomain,					// trgDomain
-							"SNOMED", 						// trgVocabulary
-							(long) targetConcept.conceptId);// trgConceptId
-					break;
+					case "Measurement":
+						tmpId = addToMeasurement(
+								personId,						// person_id
+								(long) targetConcept.conceptId,	// measurement_concept_id
+								diagDate,						// measurement_date
+								diagDate,						// measurement_datetime
+								(long) 44818702, 				// measurement_type_concept_id, 44818702: Lab result
+								null,							// operator_concept_id
+								null,							// value_as_number
+								null,							// value_as_conceptId
+								null,							// unit_concept_id
+								null,							// range_low
+								null, 							// range_high
+								null, 							// provider_id
+								visitId, 						// visit_occurrence_id
+								code, 							// measurement_source_value
+								(long) data.sourceConceptId,	// measurement_source_concept_id
+								null,							// unit_source_value
+								null);							// value_source_value
+						s2t.add(diagnosisId, 					// srcInstance
+								"diagnosis",					// srcTable
+								code,							// srcCode
+								data.sourceConceptName,			// srcName
+								"ICD9CM", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"measurement",					// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								targetDomain,					// trgDomain
+								"SNOMED", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
+						break;
 
-				case "Observation":
-					tmpId = addToObservation(
-							personId, 						// person_id
-							(long) targetConcept.conceptId, // observation_concept_id
-							diagDate, 						// observation_date
-							null, 							// observation_datetime
-							(long) 38000280, 				// observation_type_concept_id, 38000280: Observation recorded from EHR
-							null,							// value_as_number
-							null,							// value_as_string
-							null,							// value_as_concept_id
-							null,							// qualifier_concept_id
-							null,							// unit_concept_id
-							null,							// provider_id
-							visitId,						// visit_occurrence_id
-							code,							// observation_source_value
-							(long) data.sourceConceptId,	// observation_source_concept_id
-							null,							// unit_source_value
-							null);							// qualifier_source_value
-					s2t.add(diagnosisId, 					// srcInstance
-							"diagnosis",					// srcTable
-							code,							// srcCode
-							data.sourceConceptName,			// srcName
-							"ICD9CM", 						// srcVocabulary
-							(long) data.sourceConceptId,	// srcConceptId
-							"observation",					// trgTable
-							targetConcept.conceptCode,		// trgCode
-							targetConcept.conceptName,		// trgName
-							targetDomain,					// trgDomain
-							"SNOMED", 						// trgVocabulary
-							(long) targetConcept.conceptId);// trgConceptId
-					break;
+					case "Observation":
+						tmpId = addToObservation(
+								personId, 						// person_id
+								(long) targetConcept.conceptId, // observation_concept_id
+								diagDate, 						// observation_date
+								null, 							// observation_datetime
+								(long) 38000280, 				// observation_type_concept_id, 38000280: Observation recorded from EHR
+								null,							// value_as_number
+								null,							// value_as_string
+								null,							// value_as_concept_id
+								null,							// qualifier_concept_id
+								null,							// unit_concept_id
+								null,							// provider_id
+								visitId,						// visit_occurrence_id
+								code,							// observation_source_value
+								(long) data.sourceConceptId,	// observation_source_concept_id
+								null,							// unit_source_value
+								null);							// qualifier_source_value
+						s2t.add(diagnosisId, 					// srcInstance
+								"diagnosis",					// srcTable
+								code,							// srcCode
+								data.sourceConceptName,			// srcName
+								"ICD9CM", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"observation",					// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								targetDomain,					// trgDomain
+								"SNOMED", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
+						break;
 
-				case "Procedure":
-					tmpId = addToProcedureOccurrence(
-							personId,						// person_id
-							(long) targetConcept.conceptId,	// procedure_concept_id
-							diagDate,						// procedure_date
-							diagDate,						// procedure_datetime
-							(long) 44818701, 				// procedure_type_concept_id, 44818701: From physical examination
-							null,							// modifier_concept_id
-							null,							// quantity
-							null,							// provider_id
-							visitId,						// visit_occurrence_id
-							code, 							// procedure_source_value
-							(long) data.sourceConceptId,	// procedure_source_concept_id
-							null);							// qualifierSourceValue
-					s2t.add(diagnosisId, 					// srcInstance
-							"diagnosis",					// srcTable
-							code,							// srcCode
-							data.sourceConceptName,			// srcName
-							"ICD9CM", 						// srcVocabulary
-							(long) data.sourceConceptId,	// srcConceptId
-							"procedure",					// trgTable
-							targetConcept.conceptCode,		// trgCode
-							targetConcept.conceptName,		// trgName
-							targetDomain,					// trgDomain
-							"SNOMED", 						// trgVocabulary
-							(long) targetConcept.conceptId);// trgConceptId
-					break;
+					case "Procedure":
+						tmpId = addToProcedureOccurrence(
+								personId,						// person_id
+								(long) targetConcept.conceptId,	// procedure_concept_id
+								diagDate,						// procedure_date
+								diagDate,						// procedure_datetime
+								(long) 44818701, 				// procedure_type_concept_id, 44818701: From physical examination
+								null,							// modifier_concept_id
+								null,							// quantity
+								null,							// provider_id
+								visitId,						// visit_occurrence_id
+								code, 							// procedure_source_value
+								(long) data.sourceConceptId,	// procedure_source_concept_id
+								null);							// qualifierSourceValue
+						s2t.add(diagnosisId, 					// srcInstance
+								"diagnosis",					// srcTable
+								code,							// srcCode
+								data.sourceConceptName,			// srcName
+								"ICD9CM", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"procedure",					// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								targetDomain,					// trgDomain
+								"SNOMED", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
+						break;
 
-				default:
-					System.out.println("Other domain from 'diagnosis'"+":"+targetDomain+", code: "+code+", concept_id"+targetConcept.conceptId+", "+personId); 
-					etlReport.reportProblem("condition_occurrence", "Other domain from 'diagnosis_occur'"+":"+targetDomain+", code: "+code+", concept_id: "+targetConcept.conceptId, Long.toString(personId));
-					break;
+					default:
+						System.out.println("Other domain from 'diagnosis'"+":"+targetDomain+", code: "+code+", concept_id"+targetConcept.conceptId+", "+personId); 
+						etlReport.reportProblem("condition_occurrence", "Other domain from 'diagnosis_occur'"+":"+targetDomain+", code: "+code+", concept_id: "+targetConcept.conceptId, Long.toString(personId));
+						s2t.add(diagnosisId, 					// srcInstance
+								"diagnosis",					// srcTable
+								code,							// srcCode
+								data.sourceConceptName,			// srcName
+								"ICD9CM", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"n/a",					// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								targetDomain,					// trgDomain
+								"SNOMED", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
+						break;
+					}
+					numRecs++;
 				}
+			} else { // lookup of code failed
+				s2t.add(diagnosisId, 					// srcInstance
+						"diagnosis",					// srcTable
+						code,							// srcCode
+						"<icd9cm_code_id>",				// srcName
+						"n/a", 							// srcVocabulary
+						null,							// srcConceptId
+						"n/a",							// trgTable
+						"n/a",							// trgCode
+						"n/a",							// trgName
+						"n/a",							// trgDomain
+						"n/a", 							// trgVocabulary
+						null);							// trgConceptId
 			}
-			numRecs++;
 		}
 		return numRecs;
 	}
-	
-	//********************************************************************************//
-		private long processProcedures(Row row) {
-			String patientId = row.get("patient_id").replaceAll("\u0000", "");
-			long numRecs = 0;
-			String qry = "select p.procedures_id, p.patient_id, p.visit_id, p.procedure_code, pt.procedure_type, v.end_date, v.service_id from procedures p\n";
-			qry += "left join visit v on p.visit_id=v.visit_id\n";
-			qry += "left join procedure_type pt on p.procedure_type_id=pt.procedure_type_id\n";
-			qry += "where p.patient_id = " + patientId;
-			for (Row procedureRow : sourceConnection.query(qry)) {
-				etlReport.registerIncomingData("procedures", procedureRow);
-				long procOccurId = procedureRow.getLong("procedures_id");
-				String code = procedureRow.get("procedure_code").replaceAll("\u0000", "");
-				String proctype = procedureRow.get("procedure_type").replaceAll("\u0000", "");
-				String tmpS = procedureRow.get("visit_id").replaceAll("\u0000", "");
-				Long visitId = getLongValue(tmpS);
-				String endDate = procedureRow.get("end_date").replaceAll("\u0000", "");
-				tmpS = procedureRow.get("service_id").replaceAll("\u0000", "");
-				Long refProviderId = lookupServiceToProviderId(tmpS);
 
-				CodeDomainData data = icd9ProcToConcept.getCodeData(code);
+	//********************************************************************************//
+	private long processProcedures(Row row) {
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
+		long numRecs = 0;
+		String qry = "select p.procedures_id, p.patient_id, p.visit_id, p.procedure_code, pt.procedure_type, v.end_date, v.service_id from procedures p\n";
+		qry += "left join visit v on p.visit_id=v.visit_id\n";
+		qry += "left join procedure_type pt on p.procedure_type_id=pt.procedure_type_id\n";
+		qry += "where p.patient_id = " + patientId;
+		for (Row procedureRow : sourceConnection.query(qry)) {
+			etlReport.registerIncomingData("procedures", procedureRow);
+			long procOccurId = procedureRow.getLong("procedures_id");
+			String code = procedureRow.get("procedure_code").replaceAll("\u0000", "");
+			String proctype = procedureRow.get("procedure_type").replaceAll("\u0000", "");
+			String tmpS = procedureRow.get("visit_id").replaceAll("\u0000", "");
+			Long visitId = getLongValue(tmpS);
+			String endDate = procedureRow.get("end_date").replaceAll("\u0000", "");
+			tmpS = procedureRow.get("service_id").replaceAll("\u0000", "");
+			Long refProviderId = lookupServiceToProviderId(tmpS);
+
+			CodeDomainData data = icd9ProcToConcept.getCodeData(code);
+			if (data != null) {
 				for (TargetConcept targetConcept : data.targetConcepts) {
 					String targetDomain = targetConcept.domainId;
 					switch (targetDomain) {
@@ -1150,7 +1221,7 @@ public class ImasisETLtoV5 {
 								(long) data.sourceConceptId, 		// procedure_source_concept_id
 								null);								// qualifier_source_value
 						s2t.add(Long.toString(procOccurId),			// srcInstance
-								"diagnosis",						// srcTable
+								"procedures",						// srcTable
 								code,								// srcCode
 								data.sourceConceptName,				// srcName
 								"ICD9Proc", 						// srcVocabulary
@@ -1166,168 +1237,229 @@ public class ImasisETLtoV5 {
 					default:
 						System.out.println("Other domain from 'procedure'"+":"+targetDomain+", code: "+code+", concept_id"+targetConcept.conceptId+", "+personId); 
 						etlReport.reportProblem("procedure_occurrence", "Other domain from 'procedure'"+":"+targetDomain+", code: "+code+", concept_id: "+targetConcept.conceptId, Long.toString(personId));
+						s2t.add(Long.toString(procOccurId),			// srcInstance
+								"procedures",						// srcTable
+								code,								// srcCode
+								data.sourceConceptName,				// srcName
+								"ICD9Proc", 						// srcVocabulary
+								(long) data.sourceConceptId,		// srcConceptId
+								"n/a",								// trgTable
+								targetConcept.conceptCode,			// trgCode
+								targetConcept.conceptName,			// trgName
+								targetDomain,						// trgDomain
+								"ICD9Proc", 						// trgVocabulary
+								(long) targetConcept.conceptId);	// trgConceptId
 						break;
 					}
 					numRecs++;
 				}
+			} else { // lookup of code failed
+				s2t.add(Long.toString(procOccurId), 	// srcInstance
+						"procedures",					// srcTable
+						code,							// srcCode
+						"<procedure_code>",				// srcName
+						"n/a", 							// srcVocabulary
+						null,							// srcConceptId
+						"n/a",							// trgTable
+						"n/a",							// trgCode
+						"n/a",							// trgName
+						"n/a",							// trgDomain
+						"n/a", 							// trgVocabulary
+						null);							// trgConceptId
 			}
-			return numRecs;
 		}
+		return numRecs;
+	}
 
-		//********************************************************************************//
-		private long processLaboratory(Row row) {
-			String patientId = row.get("patient_id").replaceAll("\u0000", "");
-			long numRecs = 0;
+	//********************************************************************************//
+	private long processLaboratory(Row row) {
+		String patientId = row.get("patient_id").replaceAll("\u0000", "");
+		long numRecs = 0;
 
-			String sqlQ = "select l.laboratory_id, l.lab_test_name_id, l.lab_result_name_id, l.request_date, ";
-			sqlQ += "l.result, l.lab_measure_unit_SI_id, l.visit_period_id, lm.loinc_id \n";
-			sqlQ += "from laboratory l, lab_result_name lrn, lab_test_name ltn, lab_map lm \n";
-			sqlQ += "where lrn.lab_result_name_id=l.lab_result_name_id \n";
-			sqlQ += "and ltn.lab_test_name_id=l.lab_test_name_id \n";
-			sqlQ += "and lm.lab_result_name=lrn.lab_result_name \n";
-			sqlQ += "and lm.lab_test_number=ltn.lab_test_number \n";
-			sqlQ += "and l.patient_id=" + patientId +";";
-			for (Row laboratoryRow : sourceConnection.query(sqlQ)) {
-				etlReport.registerIncomingData("laboratory", laboratoryRow);
-				String laboratoryId = laboratoryRow.get("laboratory_id").replaceAll("\u0000", "");
-				String labTestNameId = laboratoryRow.get("lab_test_name_id").replaceAll("\u0000", "").trim();
-				String labResultNameId = laboratoryRow.get("lab_result_name_id").replaceAll("\u0000", "").trim();
-				String requestDate = laboratoryRow.get("request_date").replaceAll("\u0000", "").trim();
-				String tmpS = laboratoryRow.get("visit_period_id").replaceAll("\u0000", "");
-				Long visitId = getLongValue(tmpS);
+		String sqlQ = "select l.laboratory_id, l.lab_test_name_id, l.lab_result_name_id, l.request_date, ";
+		sqlQ += "l.result, l.lab_measure_unit_SI_id, l.visit_period_id \n";
+		sqlQ += "from laboratory l \n";
+		sqlQ += "where l.patient_id=" + patientId +";";
 
-				String nameUnime = laboratoryRow.get("lab_measure_unit_SI_id").replaceAll("\u0000", "").trim();
-				Long unitConceptId = null;
-				if (nameUnime.length() > 0)
-					unitConceptId = labmeasureunitToConceptId.get(nameUnime.toLowerCase());
+		for (Row laboratoryRow : sourceConnection.query(sqlQ)) {
+			etlReport.registerIncomingData("laboratory", laboratoryRow);
+			String laboratoryId = laboratoryRow.get("laboratory_id").replaceAll("\u0000", "");
+			String labTestNameId = laboratoryRow.get("lab_test_name_id").replaceAll("\u0000", "").trim();
+			String labResultNameId = laboratoryRow.get("lab_result_name_id").replaceAll("\u0000", "").trim();
+			String requestDate = laboratoryRow.get("request_date").replaceAll("\u0000", "").trim();
+			String tmpS = laboratoryRow.get("visit_period_id").replaceAll("\u0000", "");
+			Long visitId = getLongValue(tmpS);
 
-				String result = replaceSpecialChars(laboratoryRow.get("result").replaceAll("\u0000", "").trim());
-				Double resultVal = null;
-				String resultStr = null;
-				Long resultConceptId = null;
-				Long operatorConceptId = null;
-				if (result.length() > 0) {
-					if(StringUtilities.isNumber(result))
-						resultVal = getNumValue(result);
+			String nameUnime = laboratoryRow.get("lab_measure_unit_SI_id").replaceAll("\u0000", "").trim();
+			Long unitConceptId = null;
+			if (nameUnime.length() > 0)
+				unitConceptId = labmeasureunitToConceptId.get(nameUnime.toLowerCase());
+
+			String result = replaceSpecialChars(laboratoryRow.get("result").replaceAll("\u0000", "").trim());
+			Double resultVal = null;
+			String resultStr = null;
+			Long resultConceptId = null;
+			Long operatorConceptId = null;
+			if (result.length() > 0) {
+				if(StringUtilities.isNumber(result))
+					resultVal = getNumValue(result);
+				else {
+					if ((result.startsWith("<=")) || (result.startsWith(">="))) {
+						operatorConceptId = extractOperatorConceptId(result);
+						try {
+							resultVal = Double.parseDouble(result.substring(2));
+						} catch (Exception e) {
+							resultVal = null;
+							resultStr = result.substring(2);
+						}
+					}
 					else {
-						if ((result.startsWith("<=")) || (result.startsWith(">="))) {
+						if ((result.startsWith("<")) || (result.startsWith(">"))|| (result.startsWith("="))) {
 							operatorConceptId = extractOperatorConceptId(result);
 							try {
-								resultVal = Double.parseDouble(result.substring(2));
+								resultVal = Double.parseDouble(result.substring(1));
 							} catch (Exception e) {
 								resultVal = null;
-								resultStr = result.substring(2);
+								resultStr = result.substring(1);
 							}
 						}
 						else {
-							if ((result.startsWith("<")) || (result.startsWith(">"))|| (result.startsWith("="))) {
-								operatorConceptId = extractOperatorConceptId(result);
-								try {
-									resultVal = Double.parseDouble(result.substring(1));
-								} catch (Exception e) {
-									resultVal = null;
-									resultStr = result.substring(1);
-								}
-							}
-							else {
-								resultConceptId = resultcodeToConceptId.get(result.toLowerCase());
-								if (resultConceptId == null)
-									resultStr = result;
-							}
-						}
-					}
-				}
-				
-				String loincId = laboratoryRow.get("loinc_id").replaceAll("\u0000", "").trim();
-				if ((loincId != null) && (loincId.length() > 0)) {
-					CodeDomainData data = loincToConcept.getCodeData(loincId);
-					for (TargetConcept targetConcept : data.targetConcepts) {
-						Long measConceptId = (long) targetConcept.conceptId;
-						String domainId = targetConcept.domainId;
-						
-						Long tmpId = null;
-						if (domainId != null) {
-							switch (domainId) {
-							case "Measurement":
-								tmpId = addToMeasurement(
-										personId,			// person_id
-										measConceptId,		// measurement_concept_id
-										requestDate,		// measurement_date
-										requestDate,		// measurement_datetime
-										(long) 44818702, 	// measurement_type_concept_id, 44818702: Lab result
-										operatorConceptId,	// operator_concept_id
-										resultVal,			// value_as_number
-										resultConceptId,	// value_as_conceptId
-										unitConceptId,		// unit_concept_id
-										null,				// range_low
-										null, 				// range_high
-										null, 				// provider_id
-										visitId, 			// visit_occurrence_id
-										labTestNameId, 		// measurement_source_value
-										null,				// measurement_source_concept_id
-										nameUnime,			// unit_source_value
-										result);			// value_source_value
-								s2t.add(laboratoryId, 					// srcInstance
-										"laboratory",					// srcTable
-										loincId,						// srcCode
-										data.sourceConceptName,			// srcName
-										"LOINC", 						// srcVocabulary
-										(long) data.sourceConceptId,	// srcConceptId
-										"measurement",					// trgTable
-										targetConcept.conceptCode,		// trgCode
-										targetConcept.conceptName,		// trgName
-										domainId,						// trgDomain
-										"LOINC", 						// trgVocabulary
-										(long) targetConcept.conceptId);// trgConceptId
-								numRecs++;
-								break;
-							case "Observation":
-								tmpId = addToObservation(
-										personId,				// person_id
-										measConceptId,			// observation_concept_id
-										requestDate,			// observation_date
-										null,					// observation_datetime
-										(long) 38000280,		// observation_type_concept_id, 38000280: Observation recorded from EHR
-										resultVal,				// value_as_number
-										resultStr,				// value_as_string
-										resultConceptId,		// value_as_concept_id
-										operatorConceptId,		// qualifier_concept_id
-										unitConceptId,			// unit_concept_id
-										null,					// provider_id
-										null,					// visit_occurrence_id
-										result,					// observation_source_value
-										null,					// observation_source_concept_id
-										nameUnime,				// unitSource_value
-										null);					// qualifier_source_value
-								s2t.add(laboratoryId, 					// srcInstance
-										"laboratory",					// srcTable
-										loincId,						// srcCode
-										data.sourceConceptName,			// srcName
-										"LOINC", 						// srcVocabulary
-										(long) data.sourceConceptId,	// srcConceptId
-										"observation",					// trgTable
-										targetConcept.conceptCode,		// trgCode
-										targetConcept.conceptName,		// trgName
-										domainId,						// trgDomain
-										"LOINC", 						// trgVocabulary
-										(long) targetConcept.conceptId);// trgConceptId
-								numRecs++;
-								break;
-							default:
-								if (domainId.length() > 0) {
-									System.out.println("Other domain from 'laboratory'"+":"+domainId+", concept_id"+measConceptId+", "+personId); 
-									etlReport.reportProblem("measurement", "Other domain from 'laboratory_occur':"+domainId+", concept_id: "+measConceptId, Long.toString(personId));
-								}
-								break;
-							}
+							resultConceptId = resultcodeToConceptId.get(result.toLowerCase());
+							if (resultConceptId == null)
+								resultStr = result;
 						}
 					}
 				}
 			}
-			return numRecs;
+			String resTestName = labResultNameId + "_" + labTestNameId;
+			String loincId = resTestToLoincCode.get(resTestName);
+			if ((loincId != null) && (loincId.length() > 0)) {
+				CodeDomainData data = loincToConcept.getCodeData(loincId);
+				for (TargetConcept targetConcept : data.targetConcepts) {
+					Long measConceptId = (long) targetConcept.conceptId;
+					String domainId = targetConcept.domainId;
+
+					Long tmpId = null;
+					if (domainId != null) {
+						switch (domainId) {
+						case "Measurement":
+							tmpId = addToMeasurement(
+									personId,			// person_id
+									measConceptId,		// measurement_concept_id
+									requestDate,		// measurement_date
+									requestDate,		// measurement_datetime
+									(long) 44818702, 	// measurement_type_concept_id, 44818702: Lab result
+									operatorConceptId,	// operator_concept_id
+									resultVal,			// value_as_number
+									resultConceptId,	// value_as_conceptId
+									unitConceptId,		// unit_concept_id
+									null,				// range_low
+									null, 				// range_high
+									null, 				// provider_id
+									visitId, 			// visit_occurrence_id
+									labTestNameId, 		// measurement_source_value
+									null,				// measurement_source_concept_id
+									nameUnime,			// unit_source_value
+									result);			// value_source_value
+							s2t.add(laboratoryId, 					// srcInstance
+									"laboratory",					// srcTable
+									loincId,						// srcCode
+									data.sourceConceptName,			// srcName
+									"LOINC", 						// srcVocabulary
+									(long) data.sourceConceptId,	// srcConceptId
+									"measurement",					// trgTable
+									targetConcept.conceptCode,		// trgCode
+									targetConcept.conceptName,		// trgName
+									domainId,						// trgDomain
+									"LOINC", 						// trgVocabulary
+									(long) targetConcept.conceptId);// trgConceptId
+							numRecs++;
+							break;
+						case "Observation":
+							tmpId = addToObservation(
+									personId,				// person_id
+									measConceptId,			// observation_concept_id
+									requestDate,			// observation_date
+									null,					// observation_datetime
+									(long) 38000280,		// observation_type_concept_id, 38000280: Observation recorded from EHR
+									resultVal,				// value_as_number
+									resultStr,				// value_as_string
+									resultConceptId,		// value_as_concept_id
+									operatorConceptId,		// qualifier_concept_id
+									unitConceptId,			// unit_concept_id
+									null,					// provider_id
+									null,					// visit_occurrence_id
+									result,					// observation_source_value
+									null,					// observation_source_concept_id
+									nameUnime,				// unitSource_value
+									null);					// qualifier_source_value
+							s2t.add(laboratoryId, 					// srcInstance
+									"laboratory",					// srcTable
+									loincId,						// srcCode
+									data.sourceConceptName,			// srcName
+									"LOINC", 						// srcVocabulary
+									(long) data.sourceConceptId,	// srcConceptId
+									"observation",					// trgTable
+									targetConcept.conceptCode,		// trgCode
+									targetConcept.conceptName,		// trgName
+									domainId,						// trgDomain
+									"LOINC", 						// trgVocabulary
+									(long) targetConcept.conceptId);// trgConceptId
+							numRecs++;
+							break;
+						default:
+							if (domainId.length() > 0) {
+								System.out.println("Other domain from 'laboratory'"+":"+domainId+", concept_id"+measConceptId+", "+personId); 
+								etlReport.reportProblem("measurement", "Other domain from 'laboratory_occur':"+domainId+", concept_id: "+measConceptId, Long.toString(personId));
+								s2t.add(laboratoryId, 					// srcInstance
+										"laboratory",					// srcTable
+										loincId,						// srcCode
+										data.sourceConceptName,			// srcName
+										"LOINC", 						// srcVocabulary
+										(long) data.sourceConceptId,	// srcConceptId
+										"n/a",							// trgTable
+										targetConcept.conceptCode,		// trgCode
+										targetConcept.conceptName,		// trgName
+										domainId,						// trgDomain
+										"LOINC", 						// trgVocabulary
+										(long) targetConcept.conceptId);// trgConceptId
+							}
+							break;
+						}
+					} else {
+						s2t.add(laboratoryId, 					// srcInstance
+								"laboratory",					// srcTable
+								loincId,						// srcCode
+								data.sourceConceptName,			// srcName
+								"LOINC", 						// srcVocabulary
+								(long) data.sourceConceptId,	// srcConceptId
+								"n/a",							// trgTable
+								targetConcept.conceptCode,		// trgCode
+								targetConcept.conceptName,		// trgName
+								"n/a",							// trgDomain
+								"LOINC", 						// trgVocabulary
+								(long) targetConcept.conceptId);// trgConceptId
+					}
+				}
+			} else { // no LOINC_ID given
+				s2t.add(laboratoryId, 					// srcInstance
+						"laboratory",					// srcTable
+						resTestName,					// srcCode
+						"<resultNameId_testNameId>",	// srcName
+						"n/a", 							// srcVocabulary
+						null,							// srcConceptId
+						"n/a",							// trgTable
+						"n/a",							// trgCode
+						"n/a",							// trgName
+						"n/a",							// trgDomain
+						"n/a", 							// trgVocabulary
+						null);						// trgConceptId
+			}
 		}
-		
-		//********************************************************************************//
+		return numRecs;
+	}
+
+	//********************************************************************************//
 	private void processServiceRecords() {
 		for (Row serviceRow : sourceConnection.query("select * from services where service_id is not null")) {
 			Long serviceId = serviceRow.getLong("service_id");
@@ -1407,18 +1539,6 @@ public class ImasisETLtoV5 {
 					careSite.add("care_site_name", name);
 					careSite.add("care_site_source_value", visitHospId);
 					tableToRows.put("care_site", careSite);
-//					s2t.add("", 					// srcInstance
-//							"visit_hospital", 	// srcTable
-//							visitHospId,				// srcCode
-//							name, 					// srcName
-//							"", 					// srcVocabulary
-//							null, 					// srcConceptId
-//							"care_site",				// trgTable
-//							Long.toString(careSiteId),// trgCode
-//							name, 					// trgName
-//							"", 					// trgDomain
-//							"", 					// trgVocabulary
-//							(long) 0);				// trgConceptId
 					numRecs++;
 				}
 			}
@@ -1974,16 +2094,16 @@ public class ImasisETLtoV5 {
 	}
 
 	//********************  ********************//
-	  private static String replaceSpecialChars( String src )
-	  {
-	      src = src.replace("&amp;", "&");
-	      src = src.replace("&lt;", "<");
-	      src = src.replace("&gt;", ">");
-	      src = src.replace("&le;", "<=");
-	      src = src.replace("&ge;", ">=");
+	private static String replaceSpecialChars( String src )
+	{
+		src = src.replace("&amp;", "&");
+		src = src.replace("&lt;", "<");
+		src = src.replace("&gt;", ">");
+		src = src.replace("&le;", "<=");
+		src = src.replace("&ge;", ">=");
 
-	      return src;
-	  }
+		return src;
+	}
 
 	//********************  ********************//
 	public static boolean isInteger(String s) {

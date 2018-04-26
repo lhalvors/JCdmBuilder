@@ -32,6 +32,11 @@ public class SourceToTargetTrack {
 	}
 
 	//********************  ********************//
+	public String getTrackFile() {
+		return trackFile;
+	}
+	
+	//********************  ********************//
 	
 	public void add(String srcInstance, 
 					String srcTable, 
