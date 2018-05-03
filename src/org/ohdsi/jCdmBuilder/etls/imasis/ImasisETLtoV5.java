@@ -1009,7 +1009,7 @@ public class ImasisETLtoV5 {
 					note.add("language_concept_id", 0);//TODO: Check
 					note.add("provider_id", (refProviderId != null ? refProviderId.toString() : ""));
 					note.add("visit_occurrence_id", (visitId != null ? visitId.toString() : ""));
-					note.add("note_source_value", visitAnnotationsId.toString());
+					note.add("note_source_value", checkStringLength(visitAnnotationsId.toString(),50,"note:note_source_value"));
 					tableToRows.put("note", note);
 				}
 				numRecs++;
@@ -1529,7 +1529,7 @@ public class ImasisETLtoV5 {
 					location.add("state", "");
 					location.add("zip", "");
 					location.add("county", "");
-					location.add("location_source_value", name);
+					location.add("location_source_value", checkStringLength(name, 50, "location_source_value"));
 					tableToRows.put("location", location);
 					numRecs++;
 				}
@@ -1553,7 +1553,7 @@ public class ImasisETLtoV5 {
 					Row careSite = new Row();
 					careSite.add("care_site_id", careSiteId);
 					careSite.add("care_site_name", name);
-					careSite.add("care_site_source_value", visitHospId);
+					careSite.add("care_site_source_value", checkStringLength(visitHospId, 50, "care_site:care_site_source_value"));
 					tableToRows.put("care_site", careSite);
 					numRecs++;
 				}
@@ -1605,10 +1605,10 @@ public class ImasisETLtoV5 {
 		drugExposure.add("lot_number", lotNumber != null ? lotNumber : "");
 		drugExposure.add("provider_id", (deProviderId != null ? deProviderId.toString() : ""));
 		drugExposure.add("visit_occurrence_id", (visitOccurrenceId != null ? visitOccurrenceId.toString() : ""));
-		drugExposure.add("drug_source_value", drugSourceValue != null ? drugSourceValue : "");
+		drugExposure.add("drug_source_value", drugSourceValue != null ? checkStringLength(drugSourceValue, 50, "drug_exposure:drug_source_value") : "");
 		drugExposure.add("drug_source_concept_id", (drug_sourceConceptId != null ? drug_sourceConceptId.toString() : ""));
-		drugExposure.add("route_source_value", routeSourceValue != null ? routeSourceValue : "");
-		drugExposure.add("dose_unit_source_value", doseUnitSourceValue != null ? doseUnitSourceValue : "");
+		drugExposure.add("route_source_value", routeSourceValue != null ? checkStringLength(routeSourceValue, 50, "drug_exposure:route_source_value") : "");
+		drugExposure.add("dose_unit_source_value", doseUnitSourceValue != null ? checkStringLength(doseUnitSourceValue, 50, "drug_exposure:dose_unit_source_value") : "");
 		tableToRows.put("drug_exposure", drugExposure);
 	}
 
@@ -1665,10 +1665,10 @@ public class ImasisETLtoV5 {
 		measurement.add("range_high", (rangeHigh != null ? rangeHigh.toString() : ""));
 		measurement.add("provider_id", (mProviderId != null ? mProviderId.toString() : ""));
 		measurement.add("visit_occurrence_id", (visitOccurrenceId != null ? visitOccurrenceId.toString() : ""));
-		measurement.add("measurement_source_value", measurementSourceValue != null ? measurementSourceValue : "");
+		measurement.add("measurement_source_value", measurementSourceValue != null ? checkStringLength(measurementSourceValue, 50, "measurement:measurement_source_value") : "");
 		measurement.add("measurement_source_concept_id", (measurementSourceConceptId != null ? measurementSourceConceptId.toString() : ""));
-		measurement.add("unit_source_value", unitSourceValue != null ? unitSourceValue : "");
-		measurement.add("value_source_value", valueSourceValue != null ? valueSourceValue : "");
+		measurement.add("unit_source_value", unitSourceValue != null ? checkStringLength(unitSourceValue, 50, "measurement:unit_source_value") : "");
+		measurement.add("value_source_value", valueSourceValue != null ? checkStringLength(valueSourceValue, 50, "measurement:value_source_value") : "");
 		tableToRows.put("measurement", measurement);
 		return retId;
 	}
@@ -1760,10 +1760,10 @@ public class ImasisETLtoV5 {
 		observation.add("unit_concept_id", (unitConceptId != null ? unitConceptId.toString() : ""));
 		observation.add("provider_id", (obProviderId != null ? obProviderId.toString() : ""));
 		observation.add("visit_occurrence_id", (visitOccurrenceId != null ? visitOccurrenceId.toString() : ""));
-		observation.add("observation_source_value", observationSourceValue != null ? observationSourceValue : "");
+		observation.add("observation_source_value", observationSourceValue != null ? checkStringLength(observationSourceValue, 50, "observation:observation_source_value") : "");
 		observation.add("observation_source_concept_id", (observationSourceConceptId != null ? observationSourceConceptId.toString() : ""));
-		observation.add("unit_source_value", unitSourceValue != null ? unitSourceValue : "");
-		observation.add("qualifier_source_value", qualifierSourceValue != null ? qualifierSourceValue : "");
+		observation.add("unit_source_value", unitSourceValue != null ? checkStringLength(unitSourceValue, 50, "observation:unit_source_value") : "");
+		observation.add("qualifier_source_value", qualifierSourceValue != null ? checkStringLength(qualifierSourceValue, 50, "observation:qualifier_source_value") : "");
 		tableToRows.put("observation", observation);
 		return retId;
 	}
@@ -1794,7 +1794,7 @@ public class ImasisETLtoV5 {
 		deviceExposure.add("quantity", (quantity != null ? quantity.toString() : ""));
 		deviceExposure.add("provider_id", (deProviderId != null ? deProviderId.toString() : ""));
 		deviceExposure.add("visit_occurrence_id", (deVisitOccurrenceId != null ? deVisitOccurrenceId.toString() : ""));
-		deviceExposure.add("device_source_value", deviceSourceValue != null ? deviceSourceValue : "");
+		deviceExposure.add("device_source_value", deviceSourceValue != null ? checkStringLength(deviceSourceValue, 100, "device_exposure:device_source_value") : "");
 		deviceExposure.add("device_source_concept_id", (deviceSourceConceptId != null ? deviceSourceConceptId.toString() : ""));
 		tableToRows.put("device_exposure", deviceExposure);
 		return retId;
@@ -1826,7 +1826,7 @@ public class ImasisETLtoV5 {
 		conditionOccurrence.add("stop_reason", stopReason != null ? stopReason : "");
 		conditionOccurrence.add("provider_id", (coProviderId != null ? coProviderId.toString() : ""));
 		conditionOccurrence.add("visit_occurrence_id", (coVisitOccurrenceId != null ? coVisitOccurrenceId.toString() : ""));
-		conditionOccurrence.add("condition_source_value", conditionSourceValue != null ? conditionSourceValue : "");
+		conditionOccurrence.add("condition_source_value", conditionSourceValue != null ? checkStringLength(conditionSourceValue, 50, "condition_occurrence:condition_source_value") : "");
 		conditionOccurrence.add("condition_source_concept_id", (conditionSourceConceptId != null ? conditionSourceConceptId.toString() : ""));
 		conditionOccurrence.add("condition_status_source_value", "");
 		conditionOccurrence.add("condition_status_concept_id", "");
@@ -1861,9 +1861,9 @@ public class ImasisETLtoV5 {
 		procedureOccurrence.add("quantity", (quantity != null ? quantity.toString() : ""));
 		procedureOccurrence.add("provider_id", (poProviderId != null ? poProviderId.toString() : ""));
 		procedureOccurrence.add("visit_occurrence_id", (poVisitOccurrenceId != null ? poVisitOccurrenceId.toString() : ""));
-		procedureOccurrence.add("procedure_source_value", procedureSourceValue != null ? procedureSourceValue : "");
+		procedureOccurrence.add("procedure_source_value", procedureSourceValue != null ? checkStringLength(procedureSourceValue, 50, "procedure_occurrence:procedure_source_value") : "");
 		procedureOccurrence.add("procedure_source_concept_id", (procedureSourceConceptId != null ? procedureSourceConceptId.toString() : ""));
-		procedureOccurrence.add("qualifier_source_value", qualifierSourceValue != null ? qualifierSourceValue : "");
+		procedureOccurrence.add("qualifier_source_value", qualifierSourceValue != null ? checkStringLength(qualifierSourceValue, 50, "procedure_occurrence:qualifier_source_value") : "");
 		tableToRows.put("procedure_occurrence", procedureOccurrence);
 		return retId;
 	}
@@ -1896,9 +1896,9 @@ public class ImasisETLtoV5 {
 		procedureOccurrence.add("quantity", (quantity != null ? quantity.toString() : ""));
 		procedureOccurrence.add("provider_id", (poProviderId != null ? poProviderId.toString() : ""));
 		procedureOccurrence.add("visit_occurrence_id", (poVisitOccurrenceId != null ? poVisitOccurrenceId.toString() : ""));
-		procedureOccurrence.add("procedure_source_value", procedureSourceValue != null ? procedureSourceValue : "");
+		procedureOccurrence.add("procedure_source_value", procedureSourceValue != null ? checkStringLength(procedureSourceValue, 50, "procedure_occurrence:procedure_source_value") : "");
 		procedureOccurrence.add("procedure_source_concept_id", (procedureSourceConceptId != null ? procedureSourceConceptId.toString() : ""));
-		procedureOccurrence.add("qualifier_source_value", qualifierSourceValue != null ? qualifierSourceValue : "");
+		procedureOccurrence.add("qualifier_source_value", qualifierSourceValue != null ? checkStringLength(qualifierSourceValue, 50, "procedure_occurrence:qualifier_source_value") : "");
 		tableToRows.put("procedure_occurrence", procedureOccurrence);
 	}
 
@@ -1925,7 +1925,7 @@ public class ImasisETLtoV5 {
 		visitOccurrence.add("visit_type_concept_id", (visitTypeConceptId != null ? visitTypeConceptId.toString() : "")); 
 		visitOccurrence.add("provider_id", (visitProviderId != null ? visitProviderId.toString() : ""));
 		visitOccurrence.add("care_site_id", (visitCareSiteId != null ? visitCareSiteId.toString() : ""));
-		visitOccurrence.add("visit_source_value", visitSourceValue != null ? visitSourceValue : "");
+		visitOccurrence.add("visit_source_value", visitSourceValue != null ? checkStringLength(visitSourceValue, 50, "visit_occurrence:visit_source_value") : "");
 		visitOccurrence.add("visit_source_concept_id", "");
 		tableToRows.put("visit_occurrence", visitOccurrence);
 	}
@@ -1950,7 +1950,7 @@ public class ImasisETLtoV5 {
 		visitOccurrence.add("visit_type_concept_id", (visitTypeConceptId != null ? visitTypeConceptId.toString() : "")); 
 		visitOccurrence.add("provider_id", (visitProviderId != null ? visitProviderId.toString() : ""));
 		visitOccurrence.add("care_site_id", (visitCareSiteId != null ? visitCareSiteId.toString() : ""));
-		visitOccurrence.add("visit_source_value", visitSourceValue != null ? visitSourceValue : "");
+		visitOccurrence.add("visit_source_value", visitSourceValue != null ? checkStringLength(visitSourceValue, 50, "visit_occurrence:visit_source_value") : "");
 		visitOccurrence.add("visit_source_concept_id", "");
 		tableToRows.put("visit_occurrence", visitOccurrence);
 		return retId;
@@ -2072,6 +2072,7 @@ public class ImasisETLtoV5 {
 		long availableMemory = calculatedFreeMemory();
 		return (availableMemory < minimumFreeMemory);
 	}
+	
 	//********************  ********************//
 	private String createSourceValue(String destTable, String destField, String personId, int maxLength, String sourceValue) {
 		String retString = "";
