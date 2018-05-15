@@ -15,7 +15,10 @@
  ******************************************************************************/
 package org.ohdsi.jCdmBuilder.etls.imasis;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.text.DateFormat;
 import java.text.DecimalFormat;
 import java.text.DecimalFormatSymbols;
@@ -103,11 +106,15 @@ public class ImasisETLtoV5 {
 	public Boolean						generateQaSamples = false;	// Generate QA Samples at end of ETL
 	public double						qaSampleProbability;		// The sample probability value used to include a patient's records in the QA Sample export
 	public Boolean						enforceObservationPeriods = true;	// Remove records that fall outside observation_period definitions
+	private Boolean						sourceCountsLogFile; 		// Log number of related source records per patient record
+	public SourceCounts					srcCounts = new SourceCounts();
 	
 	private String						memFilename;
 	private WriteTextFile 				memOut;
 	private String						logFilename;
 	private WriteTextFile 				logOut = null;
+	private String						srcCntFilename;
+	private BufferedWriter 				srcCntOut = null;
 	private DecimalFormat 				df = new DecimalFormat();
 	private DecimalFormatSymbols 		dfs = new DecimalFormatSymbols();
 	private Runtime						runTime = Runtime.getRuntime();
@@ -135,6 +142,7 @@ public class ImasisETLtoV5 {
 		diagnosisCodeToConceptId.clear();
 		procedureCodeToConceptId.clear();
 		resTestToLoincCode.clear();
+		srcCounts.resetCounts();
 
 		loadSettings();
 
@@ -156,6 +164,9 @@ public class ImasisETLtoV5 {
 		if (memoryLogFile > 0)
 			setUpMemOutFile();
 
+		if (sourceCountsLogFile)
+			setUpSrcCntOutFile();
+		
 		if (generateQaSamples)
 			qcSampleConstructor = new QCSampleConstructor(folder + "/sample", qaSampleProbability);
 		tableToRows = new OneToManyList<String, Row>();
@@ -214,6 +225,14 @@ public class ImasisETLtoV5 {
 
 		if (logOut != null)
 			logOut.close();
+		
+		if (sourceCountsLogFile)
+			try {
+				srcCntOut.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	}
 
 	//********************  ********************//
@@ -233,8 +252,97 @@ public class ImasisETLtoV5 {
 
 		StringUtilities.outputWithTime("Memory log file created: "+ memFilename);
 	}
+	//********************  ********************//
+	private void setUpSrcCntOutFile() {
+		srcCntFilename = folder + "/srcCntLog.txt";
+		int i = 1;
+		while (new File(srcCntFilename).exists())
+			srcCntFilename = folder + "/srcCntLog" + (i++) + ".txt";
+		try {
+			srcCntOut = new BufferedWriter(new FileWriter(srcCntFilename));
+			srcCntOut.write("patient_id"+((char) 9)
+					+"#patient_measures"+((char) 9)
+					+"#patient_pressure_measures"+((char) 9)
+					+"#laboratory"+((char) 9)
+					+"#visit_period"+((char) 9)
+					+"#diagnosis"+((char) 9)
+					+"#procedures"+((char) 9)
+					+"#visit"+((char) 9)
+					+"#visit_annotation"+((char) 9)
+					+"#drug_administration");
+			srcCntOut.newLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+
+		StringUtilities.outputWithTime("Source count log file created: "+ srcCntFilename);
+	}
 
 	//********************  ********************//
+	private void writeSrcCnt() {
+		try {
+			srcCntOut.write(srcCounts.patient_id+((char) 9)
+					+Long.toString(srcCounts.numPatMeasures)+((char) 9)
+					+Long.toString(srcCounts.numPatPressMeasures)+((char) 9)
+					+Long.toString(srcCounts.numLaboratory)+((char) 9)
+					+Long.toString(srcCounts.numVisitPeriods)+((char) 9)
+					+Long.toString(srcCounts.numDiagnosis)+((char) 9)
+					+Long.toString(srcCounts.numProcedures)+((char) 9)
+					+Long.toString(srcCounts.numVisits)+((char) 9)
+					+Long.toString(srcCounts.numVisitAnnotations)+((char) 9)
+					+Long.toString(srcCounts.numDrugAdmins));
+			srcCntOut.newLine();
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+	}
+	//********************  ********************//
+	private void writeSrcCntValue(String whichVal) {
+		try {
+			switch (whichVal.toLowerCase()) {
+			case "patient_id":
+				srcCntOut.write(srcCounts.patient_id+((char) 9));
+				break;
+			case "patmeasures":   
+				srcCntOut.write(Long.toString(srcCounts.numPatMeasures)+((char) 9));
+				break;
+			case "patpressuremeasures":   
+				srcCntOut.write(Long.toString(srcCounts.numPatPressMeasures)+((char) 9));
+				break;
+			case "laboratory":   
+				srcCntOut.write(Long.toString(srcCounts.numLaboratory)+((char) 9));
+				break;
+			case "visitperiods":   
+				srcCntOut.write(Long.toString(srcCounts.numVisitPeriods)+((char) 9));
+				break;
+			case "diagnosis":   
+				srcCntOut.write(Long.toString(srcCounts.numDiagnosis)+((char) 9));
+				break;
+			case "procedures":   
+				srcCntOut.write(Long.toString(srcCounts.numProcedures)+((char) 9));
+				break;
+			case "visits":   
+				srcCntOut.write(Long.toString(srcCounts.numVisits)+((char) 9));
+				break;
+			case "visitannotations":   
+				srcCntOut.write(Long.toString(srcCounts.numVisitAnnotations)+((char) 9));
+				break;
+			case "drugadmins":   
+				srcCntOut.write(Long.toString(srcCounts.numDrugAdmins));
+				srcCntOut.newLine();
+				break;
+			default:
+				srcCntOut.write("<unknown: "+whichVal+">"+((char) 9));
+				break;
+			}
+		} catch (IOException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}			
+
+	}	//********************  ********************//
 	private void setUpLogFile() {
 		logFilename = folder + "/etlLog.txt";
 		int i = 1;
@@ -421,6 +529,7 @@ public class ImasisETLtoV5 {
 		qaSampleProbability = QA_SAMPLE_PROBABILITY_DEFAULT;	// The sample probability value used to include a patient's records in the QA Sample export (default: 0.0001)
 		memoryLogFile = 0;										// 0: No, 1: every time a batch is inserted in target, 2: for every patient record (default: 0)
 		enforceObservationPeriods = ENFORCE_OBS_PERIOD_DEFAULT;	// Remove records that fall outside observation_period definitions (default: true)
+		sourceCountsLogFile = false;							// Log number of related source records per patient record
 		
 		File f = new File("imasis.ini");
 		if(f.exists() && !f.isDirectory()) { 
@@ -488,6 +597,17 @@ public class ImasisETLtoV5 {
 					enforceObservationPeriods = ENFORCE_OBS_PERIOD_DEFAULT;
 				}
 
+				try {
+					Long numParam = Long.valueOf(settings.get("sourceCountsLogFile"));
+					if (numParam != null)
+						if (numParam == 1)
+							sourceCountsLogFile = true;
+						else
+							sourceCountsLogFile = false;
+				} catch (Exception e) {
+					sourceCountsLogFile = false;
+				}
+
 				String hello = settings.get("hello");
 				if (hello != null)
 					StringUtilities.outputWithTime(hello);
@@ -527,7 +647,8 @@ public class ImasisETLtoV5 {
 			etlReport.registerIncomingData("patient", row);
 			personId = getLongValue(tmpS);
 			personCount++;
-
+			srcCounts.resetCounts();
+			
 			long measureCnt = 0;
 			long pressMeasureCnt = 0;
 			long labOccurCnt = 0;
@@ -539,7 +660,11 @@ public class ImasisETLtoV5 {
 			long drugExposureCnt = 0;
 			if (generateQaSamples)
 				qcSampleConstructor.registerPersonData("patient", row, personId);
-
+			if (sourceCountsLogFile) {
+				srcCounts.patient_id = tmpS;
+				writeSrcCntValue("patient_id");
+			}
+			
 			if (addPersonAndDeathRecords(row)) {
 				measureCnt = processPatientMeasures(row);
 				pressMeasureCnt = processPatientPressureMeasures(row);
@@ -551,6 +676,8 @@ public class ImasisETLtoV5 {
 				visitAnnotationCnt = processVisitAnnotationsRecords(row);
 				drugExposureCnt = processDrugRecords(row);
 			}
+//			if (sourceCountsLogFile)
+//				writeSrcCnt();
 		}
 	}
 
@@ -641,6 +768,8 @@ public class ImasisETLtoV5 {
 		long numRecs = 0;
 		for (Row measureRow : sourceConnection.query("select * from patient_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_measures", measureRow);
+			if (sourceCountsLogFile)
+				srcCounts.numPatMeasures++;
 
 			String measureDate = measureRow.get("measurement_date").replaceAll("\u0000", "");
 			Long visitOccId = null;          //TODO: visit_occurrence_id !!!!!!!!!!!!!!!!!!!!!!
@@ -706,6 +835,10 @@ public class ImasisETLtoV5 {
 				}			
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("patmeasures");
+		}
+
 		return numRecs;
 	}
 
@@ -715,6 +848,8 @@ public class ImasisETLtoV5 {
 		long numRecs = 0;
 		for (Row measureRow : sourceConnection.query("select * from patient_pressure_measures where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("patient_pressure_measures", measureRow);
+			if (sourceCountsLogFile)
+				srcCounts.numPatPressMeasures++;
 			String measureDate = measureRow.get("measurement_date").replaceAll("\u0000", "");
 			String measureTime = measureRow.get("measurement_hour").replaceAll("\u0000", "");
 			String measureDateTime = measureDate;
@@ -764,6 +899,9 @@ public class ImasisETLtoV5 {
 				}
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("patpressuremeasures");
+		}
 		return numRecs;
 	}
 
@@ -777,6 +915,8 @@ public class ImasisETLtoV5 {
 			String endDate = visitRow.get("end_date").replaceAll("\u0000", "");
 			if (StringUtilities.isDate(startDate)) {
 				etlReport.registerIncomingData("visit", visitRow);
+				if (sourceCountsLogFile)
+					srcCounts.numVisits++;
 				Long refCareSiteId = null;
 				String hospital = visitRow.get("visit_hospital_id").replaceAll("\u0000", "");
 				if (hospital.length() > 0) {
@@ -814,6 +954,9 @@ public class ImasisETLtoV5 {
 			}
 		}
 
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("visits");
+		}
 		return numRecs;
 	}
 
@@ -830,6 +973,8 @@ public class ImasisETLtoV5 {
 		sqlQ += "and d.drug_id = da.drug_id;";
 		for (Row drugRow : sourceConnection.query(sqlQ)) {
 			etlReport.registerIncomingData("drug_administration", drugRow);
+			if (sourceCountsLogFile)
+				srcCounts.numDrugAdmins++;
 			String drugAdministrationId = drugRow.get("drug_administration_id").replaceAll("\u0000", "");
 			String drugId = drugRow.get("drug_id").replaceAll("\u0000", "");
 			String administrationDay = drugRow.get("administration_day").replaceAll("\u0000", "");
@@ -904,6 +1049,9 @@ public class ImasisETLtoV5 {
 			}
 		}
 
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("drugadmins");
+		}
 		return numRecs;
 	}
 
@@ -952,6 +1100,8 @@ public class ImasisETLtoV5 {
 		long numRecs = 0;
 		for (Row periodRow : sourceConnection.query("select * from visit_period where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_period", periodRow);
+			if (sourceCountsLogFile)
+				srcCounts.numVisitPeriods++;
 			Long visitPeriodId = periodRow.getLong("visit_period_id");
 			String startDate = periodRow.get("start_date").replaceAll("\u0000", "");
 			String endDate = periodRow.get("end_date").replaceAll("\u0000", "");
@@ -974,6 +1124,9 @@ public class ImasisETLtoV5 {
 				numRecs++;
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("visitperiods");
+		}
 		return numRecs;
 	}
 	//********************************************************************************//
@@ -982,6 +1135,8 @@ public class ImasisETLtoV5 {
 		long numRecs = 0;
 		for (Row annotationRow : sourceConnection.query("select * from visit_annotations where patient_id = '" + patientId + "'")) {
 			etlReport.registerIncomingData("visit_annotations", annotationRow);
+			if (sourceCountsLogFile)
+				srcCounts.numVisitAnnotations++;
 			Long refProviderId = lookupServiceToProviderId(annotationRow.get("service_id").replaceAll("\u0000", ""));
 			String tmpS = annotationRow.get("visit_annotations_id").replaceAll("\u0000", "");
 			Long visitAnnotationsId = null;
@@ -1015,6 +1170,9 @@ public class ImasisETLtoV5 {
 				numRecs++;
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("visitannotations");
+		}
 		return numRecs;
 	}
 
@@ -1028,6 +1186,8 @@ public class ImasisETLtoV5 {
 		qry += "where d.patient_id = " + patientId;
 		for (Row diagnosisRow : sourceConnection.query(qry)) {
 			etlReport.registerIncomingData("diagnosis", diagnosisRow);
+			if (sourceCountsLogFile)
+				srcCounts.numDiagnosis++;
 			String diagnosisId = diagnosisRow.get("diagnosis_id").replaceAll("\u0000", "");
 			String code = diagnosisRow.get("icd9cm_code_id").replaceAll("\u0000", "");
 			String diagtype = diagnosisRow.get("diagnosis_type").replaceAll("\u0000", "");
@@ -1194,6 +1354,9 @@ public class ImasisETLtoV5 {
 						null);							// trgConceptId
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("diagnosis");
+		}
 		return numRecs;
 	}
 
@@ -1207,6 +1370,8 @@ public class ImasisETLtoV5 {
 		qry += "where p.patient_id = " + patientId;
 		for (Row procedureRow : sourceConnection.query(qry)) {
 			etlReport.registerIncomingData("procedures", procedureRow);
+			if (sourceCountsLogFile)
+				srcCounts.numProcedures++;
 			long procOccurId = procedureRow.getLong("procedures_id");
 			String code = procedureRow.get("procedure_code").replaceAll("\u0000", "");
 			String proctype = procedureRow.get("procedure_type").replaceAll("\u0000", "");
@@ -1284,6 +1449,9 @@ public class ImasisETLtoV5 {
 						null);							// trgConceptId
 			}
 		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("procedures");
+		}
 		return numRecs;
 	}
 
@@ -1299,6 +1467,8 @@ public class ImasisETLtoV5 {
 
 		for (Row laboratoryRow : sourceConnection.query(sqlQ)) {
 			etlReport.registerIncomingData("laboratory", laboratoryRow);
+			if (sourceCountsLogFile)
+				srcCounts.numLaboratory++;
 			String laboratoryId = laboratoryRow.get("laboratory_id").replaceAll("\u0000", "");
 			String labTestNameId = laboratoryRow.get("lab_test_name_id").replaceAll("\u0000", "").trim();
 			String labResultNameId = laboratoryRow.get("lab_result_name_id").replaceAll("\u0000", "").trim();
@@ -1471,6 +1641,9 @@ public class ImasisETLtoV5 {
 						"n/a", 							// trgVocabulary
 						null);						// trgConceptId
 			}
+		}
+		if (sourceCountsLogFile) {
+			writeSrcCntValue("laboratory");
 		}
 		return numRecs;
 	}
@@ -2133,6 +2306,34 @@ public class ImasisETLtoV5 {
 			if(Character.digit(s.charAt(i),10) < 0) return false;
 		}
 		return true;
+	}
+	//********************  ********************//
+
+	public class SourceCounts {
+		public String patient_id;
+		public int numPatMeasures = 0;
+		public int numPatPressMeasures = 0;
+		public int numLaboratory = 0;
+		public int numVisitPeriods = 0;
+		public int numVisits = 0;
+		public int numVisitAnnotations = 0;
+		public int numDiagnosis = 0;
+		public int numProcedures = 0;
+		public int numDrugAdmins = 0;
+
+		public void resetCounts() {
+			patient_id = null;
+			numPatMeasures = 0;
+			numPatPressMeasures = 0;
+			numLaboratory = 0;
+			numVisitPeriods = 0;
+			numVisits = 0;
+			numVisitAnnotations = 0;
+			numDiagnosis = 0;
+			numProcedures = 0;
+			numDrugAdmins = 0;
+		}
+
 	}
 
 }
